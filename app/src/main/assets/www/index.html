@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6E1F45">
+<title>Дарзӣ AI — ёрдамчии дӯзанда</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+  :root{--bg:#F4EEE6;--card:#FFFDF9;--ink:#2B2420;--muted:#7A6E66;--line:#E7DED2;--plum:#A3305F;--plum2:#6E1F45;--plumL:#F6E4EC;--saffron:#E0A526;--saffL:#FBF0D6;--teal:#1F7A72;--tealL:#DDF0EC;--red:#C2412D;--redL:#F8E1DC}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,Arial,sans-serif;background:#E6DDD1;color:var(--ink);display:flex;justify-content:center;font-size:15px}
+  .phone{width:100%;max-width:440px;min-height:100vh;background:var(--bg);display:flex;flex-direction:column;position:relative}
+  header.top{background:linear-gradient(135deg,var(--plum2),var(--plum));color:#fff;padding:16px 18px 30px;position:relative;overflow:hidden}
+  header.top::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.06) 0 14px,transparent 14px 34px),repeating-linear-gradient(65deg,rgba(224,165,38,.10) 0 10px,transparent 10px 40px);pointer-events:none}
+  .tape{position:absolute;left:0;right:0;bottom:0;height:16px;background:var(--saffron);background-image:repeating-linear-gradient(90deg,rgba(43,36,32,.75) 0 1.5px,transparent 1.5px 8px),repeating-linear-gradient(90deg,rgba(43,36,32,.9) 0 2px,transparent 2px 40px);background-size:100% 6px,100% 11px;background-repeat:no-repeat;background-position:0 0,0 0}
+  .brand{display:flex;align-items:center;justify-content:space-between;position:relative}
+  .logo{font-size:24px;font-weight:800;display:flex;align-items:center;gap:10px;letter-spacing:-.02em}
+  .logo .mk{width:34px;height:34px;border-radius:11px;background:var(--saffron);display:flex;align-items:center;justify-content:center;font-size:19px}
+  .logo small{font-size:12px;font-weight:700;background:rgba(255,255,255,.18);padding:3px 8px;border-radius:99px;letter-spacing:.06em}
+  .aistat{font-size:12px;font-weight:700;padding:6px 10px;border-radius:99px;background:rgba(255,255,255,.15);position:relative}
+  main{flex:1;padding:16px 16px 110px}
+  h1{font-size:26px;font-weight:800;line-height:1.15;letter-spacing:-.02em}
+  h2{font-size:18px;font-weight:800;margin:20px 0 10px;letter-spacing:-.01em}
+  h3{font-size:15.5px;font-weight:700}
+  .muted{color:var(--muted);font-size:13.5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px}
+  .row{display:flex;gap:10px;align-items:center}.between{justify-content:space-between}.wrap{flex-wrap:wrap}
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:14px;padding:14px;font:700 15px Inter,sans-serif;cursor:pointer;background:var(--plum);color:#fff;text-align:center;text-decoration:none}
+  .btn.ink{background:var(--ink)}.btn.saff{background:var(--saffron);color:var(--ink)}.btn.light{background:var(--plumL);color:var(--plum)}.btn.ghost{background:none;border:1.5px solid var(--line);color:var(--ink)}.btn.teal{background:var(--teal)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.sm{padding:9px 12px;font-size:13.5px;width:auto;border-radius:11px}
+  .hero{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px;margin-top:-28px;position:relative;box-shadow:0 10px 30px rgba(110,31,69,.10)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .stat{background:var(--bg);border-radius:14px;padding:10px;text-align:center}
+  .stat b{display:block;font-size:22px;font-weight:800;color:var(--plum)}
+  .stat span{font-size:12px;color:var(--muted);font-weight:600}
+  .feat{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fe{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;cursor:pointer}
+  .fe .ic{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:10px}
+  .ava{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex:none;font-size:16px;overflow:hidden}
+  .ava img{width:100%;height:100%;object-fit:cover}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;margin:4px 4px 0 0;background:var(--bg);color:var(--muted)}
+  .t-plum{background:var(--plumL);color:var(--plum)}.t-saff{background:var(--saffL);color:#93670A}.t-teal{background:var(--tealL);color:var(--teal)}.t-red{background:var(--redL);color:var(--red)}
+  nav{position:fixed;bottom:0;width:100%;max-width:440px;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:flex-end;padding:6px 6px 14px;z-index:5}
+  nav button{background:none;border:none;color:#A39689;font:600 11px Inter,sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 6px;min-width:60px}
+  nav button.on{color:var(--plum)}
+  nav svg{width:23px;height:23px}
+  nav .fab{width:60px;height:60px;border-radius:20px;background:linear-gradient(135deg,var(--plum),var(--plum2));color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-26px;box-shadow:0 10px 24px rgba(110,31,69,.4);font-size:28px}
+  .back{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:19px;cursor:pointer;color:var(--ink)}
+  .steps{display:flex;gap:6px;margin:12px 0 16px}
+  .steps i{flex:1;height:5px;border-radius:9px;background:var(--line)}
+  .steps i.on{background:var(--plum)}
+  label.f{font-size:12px;font-weight:700;color:var(--muted);display:block;margin:14px 0 7px;text-transform:uppercase;letter-spacing:.07em}
+  input[type=text],input[type=tel],input[type=number],input[type=date],textarea,select{width:100%;border:1.5px solid var(--line);background:var(--card);border-radius:12px;padding:12px;font:500 15px Inter,sans-serif;color:var(--ink);margin-bottom:8px}
+  .seg{display:flex;background:#EBE3D8;border-radius:12px;padding:4px;gap:4px}
+  .seg button{flex:1;border:none;background:none;border-radius:9px;padding:10px 4px;font:600 13.5px Inter,sans-serif;cursor:pointer;color:var(--ink)}
+  .seg button.on{background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.08);color:var(--plum)}
+  .photos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ph{aspect-ratio:3/5;border:2px dashed #CDBFAF;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;background:var(--card);font-weight:700;color:var(--muted);font-size:13.5px;text-align:center;gap:8px;padding:10px}
+  .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ph input{display:none}
+  .ph .lbl{position:absolute;left:8px;top:8px;background:rgba(43,36,32,.75);color:#fff;font-size:11.5px;padding:3px 8px;border-radius:99px;z-index:2}
+  .tips{background:var(--saffL);border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.55;margin-top:12px}
+  .mark{position:relative;width:100%;border-radius:16px;overflow:hidden;background:#222;touch-action:none;user-select:none;-webkit-user-select:none}
+  .mark img{display:block;width:100%;height:auto;pointer-events:none}
+  .pt{position:absolute;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px rgba(0,0,0,.35);pointer-events:none}
+  .pt b{position:absolute;left:24px;top:-2px;font-size:11px;color:#fff;background:rgba(43,36,32,.8);padding:1px 6px;border-radius:6px;white-space:nowrap}
+  .hline{position:absolute;height:2px;background:var(--saffron);pointer-events:none;transform-origin:0 50%}
+  .ask{background:var(--ink);color:#fff;border-radius:14px;padding:12px 14px;margin:10px 0;display:flex;gap:10px;align-items:center}
+  .ask .n{background:var(--saffron);color:var(--ink);border-radius:9px;font-weight:800;padding:4px 9px;font-size:13px}
+  table.m{width:100%;border-collapse:collapse;background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+  table.m td{padding:9px 12px;border-bottom:1px solid var(--line);font-size:14px}
+  table.m tr:last-child td{border-bottom:none}
+  table.m input{width:84px;margin:0;padding:7px 9px;text-align:right;font-weight:700}
+  .src{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .ai-load{text-align:center;padding:30px 10px}
+  .scan{width:150px;height:240px;margin:0 auto 16px;border-radius:18px;position:relative;overflow:hidden;background:var(--card);border:1px solid var(--line)}
+  .scan img{width:100%;height:100%;object-fit:cover;opacity:.85}
+  .scan::after{content:'';position:absolute;left:0;right:0;height:3px;background:var(--saffron);box-shadow:0 0 14px var(--saffron);animation:scan 1.6s ease-in-out infinite alternate;top:0}
+  @keyframes scan{to{top:calc(100% - 3px)}}
+  .garm{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .gm{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 10px;text-align:center;cursor:pointer}
+  .gm.on{border-color:var(--plum);background:var(--plumL)}
+  .gm .e{font-size:30px}
+  .svgbox{background:#fff;border:1px solid var(--line);border-radius:16px;padding:8px;overflow:auto}
+  .svgbox svg{display:block;max-width:100%;max-height:440px;width:auto;height:auto;margin:0 auto}
+  .svgbox.wide svg{width:100%;max-height:none}
+  .piece{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+  .piece:last-child{border-bottom:none}
+  .big{font-size:34px;font-weight:800;color:var(--plum);letter-spacing:-.02em}
+  .ord{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:10px;border-left:5px solid var(--saffron)}
+  .pipe{display:flex;gap:4px;margin-top:10px}
+  .pipe button{flex:1;border:none;border-radius:9px;padding:8px 2px;font:700 11px Inter,sans-serif;cursor:pointer;background:var(--bg);color:var(--muted)}
+  .pipe button.on{background:var(--plum);color:#fff}
+  .pipe button.done{background:var(--plumL);color:var(--plum)}
+  .chat{display:flex;flex-direction:column;gap:10px}
+  .msg{max-width:86%;padding:11px 14px;border-radius:16px;line-height:1.5;font-size:14.5px;white-space:pre-wrap}
+  .msg.me{align-self:flex-end;background:var(--plum);color:#fff;border-bottom-right-radius:5px}
+  .msg.ai{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .chips button{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 12px;font:600 12.5px Inter,sans-serif;cursor:pointer;color:var(--ink);text-align:left}
+  .composer{position:fixed;bottom:76px;width:100%;max-width:440px;padding:8px 12px;background:linear-gradient(180deg,rgba(244,238,230,0),var(--bg) 30%);display:flex;gap:8px;z-index:4}
+  .composer input{margin:0;border-radius:99px;padding:13px 16px}
+  .composer button{border:none;background:var(--plum);color:#fff;border-radius:99px;width:48px;flex:none;font-size:19px;cursor:pointer}
+  .overlay{position:fixed;inset:0;background:rgba(43,36,32,.5);display:none;align-items:flex-end;justify-content:center;z-index:10}
+  .overlay.show{display:flex}
+  .sheet{background:var(--bg);width:100%;max-width:440px;border-radius:24px 24px 0 0;padding:20px 16px 24px;max-height:92vh;overflow-y:auto;animation:up .22s ease}
+  @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;z-index:20;display:none;max-width:90%;text-align:center}
+  .toast.show{display:block;animation:up .2s}
+  .warn{background:var(--redL);color:#7E2A1C;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5}
+  .note{background:var(--tealL);color:#164F4A;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.5}
+  .steplist{counter-reset:s}
+  .steplist div{counter-increment:s;padding:10px 0 10px 40px;position:relative;border-bottom:1px solid var(--line);line-height:1.5;font-size:14px}
+  .steplist div::before{content:counter(s);position:absolute;left:0;top:9px;width:28px;height:28px;border-radius:9px;background:var(--plumL);color:var(--plum);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .steplist div:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<div class="phone" id="app"></div>
+<div class="overlay" id="ov"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ===================== МАЪЛУМОТ ===================== */
+const ML={ // андозаҳо
+  height:'Қад',neck:'Гардан (давра)',shoulder:'Бари китф',chest:'Сина (давра)',waist:'Миён (давра)',hips:'Сурин (давра)',
+  arm:'Дарозии остин',bicep:'Бозу (давра)',wrist:'Банди даст',back:'Дарозии пушт то миён',front:'Дарозии пеш то миён',
+  inseam:'Шим — дарозии дарунӣ',outseam:'Шим — дарозии берунӣ',thigh:'Рон (давра)',pocha:'Почаи шим (давра)'};
+const MKEYS=Object.keys(ML);
+const GARM={
+  skirt:{n:'Доман',e:'👗',d:'доман тӯғрӣ бо камарбанд',need:['waist','hips']},
+  pants:{n:'Шим',e:'👖',d:'шими классикӣ',need:['waist','hips','inseam','outseam','thigh','pocha']},
+  kurta:{n:'Куртаи занона',e:'🥻',d:'куртаи миллӣ, тӯғрӣ, бо остин',need:['neck','shoulder','chest','arm','bicep','wrist','back']},
+  shirt:{n:'Куртаи мардона',e:'👔',d:'курта бо гиребон ва сардаст',need:['neck','shoulder','chest','arm','bicep','wrist','back']}
+};
+const FABRICS=[{w:50,n:'Атлас / адрас (50 см)'},{w:90,n:'90 см'},{w:110,n:'110 см'},{w:150,n:'150 см'}];
+const STAGES=['Қабул','Бурида','Дӯхта','Тайёр','Супорида'];
+const COLORS=['#A3305F','#1F7A72','#C27A1A','#5B4BB7','#2B6CB0','#B0412D'];
+const FRONT_PTS=[['head','Нӯги сар'],['heel','Поёни пошна'],['neck','Пойгоҳи гардан (марказ)'],['shL','Нӯги китфи чап'],['shR','Нӯги китфи рост'],['chL','Сина — канори чап'],['chR','Сина — канори рост'],['waL','Миён — канори чап'],['waR','Миён — канори рост'],['hiL','Сурин — канори чап'],['hiR','Сурин — канори рост'],['wrist','Банди дасти рост'],['crotch','Байни ронҳо (қадам)']];
+const SIDE_PTS=[['head','Нӯги сар'],['heel','Поёни пошна'],['chF','Сина — пеш'],['chB','Сина — пушт'],['waF','Миён — пеш'],['waB','Миён — пушт'],['hiF','Сурин — пеш'],['hiB','Сурин — пушт']];
+
+let S=load()||{clients:[],orders:[],seam:1.5};
+let tab='home',view=null,cur=null,M=null,P=null,chat=[],AI=null,AIimg=false,DL=null;
+function load(){try{const r=localStorage.getItem('darzi');return r?JSON.parse(r):null}catch(e){return null}}
+function save(){try{localStorage.setItem('darzi',JSON.stringify(S))}catch(e){toast('Хотира пур аст — баъзе аксҳоро нест кунед')}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>el.classList.remove('show'),2800)}
+function openSheet(h){document.getElementById('sheet').innerHTML=h;document.getElementById('ov').classList.add('show')}
+function closeSheet(){document.getElementById('ov').classList.remove('show')}
+document.getElementById('ov').addEventListener('click',e=>{if(e.target.id==='ov')closeSheet()});
+const uid=()=>Math.random().toString(36).slice(2,9);
+const C=id=>S.clients.find(c=>c.id===id);
+const r1=v=>Math.round(v*10)/10, r0=v=>Math.round(v);
+function lastM(c){return c&&c.meas&&c.meas.length?c.meas[c.meas.length-1]:null}
+function ava(c,s){const col=COLORS[(c.name.charCodeAt(0)||0)%COLORS.length];const m=lastM(c);return `<div class="ava" style="background:${col};${s?`width:${s}px;height:${s}px;border-radius:${s/3.2}px`:''}">${m&&m.thumb?`<img src="${m.thumb}" alt="">`:esc(c.name.split(' ').map(x=>x[0]).join('').slice(0,2))}</div>`}
+function fmtDate(t){const d=new Date(t);return d.toLocaleDateString('ru-RU')}
+
+/* ===================== ЗС (Claude) ===================== */
+(async()=>{try{if(window.claude&&claude.use){const s=await claude.use('sample');if(s){AI=s;try{const l=await s.limits();AIimg=!!(l&&l.images)}catch(e){AIimg=false}render()}
+  const d=await claude.use('downloads');if(d)DL=d}}catch(e){}})();
+function aiBadge(){return AI?(AIimg?'🟢 ЗС омода':'🟡 ЗС (бе акс)'):'⚪ ЗС офлайн'}
+
+/* ===================== АКСҲО ===================== */
+function readImg(file,max){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({url:c.toDataURL('image/jpeg',.85),w:c.width,h:c.height})};im.onerror=rej;im.src=e.target.result};r.onerror=rej;r.readAsDataURL(file)})}
+function thumbOf(url,size){return new Promise(res=>{const im=new Image();im.onload=()=>{const k=size/Math.max(im.width,im.height);const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.7))};im.src=url})}
+function dataUrlToBlob(u){const [h,b]=u.split(',');const bin=atob(b);const a=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);return new Blob([a],{type:h.slice(5,h.indexOf(';'))})}
+/* Намуна: силуэти манекен (на акси одами воқеӣ) */
+const DEMO={H:165,front:null,side:null,fp:null,sp:null};
+function demoImages(){
+  const W=600,Hh=1200;
+  function base(){const c=document.createElement('canvas');c.width=W;c.height=Hh;const g=c.getContext('2d');g.fillStyle='#EDE6DC';g.fillRect(0,0,W,Hh);g.fillStyle='#E2D7C9';g.fillRect(0,1110,W,90);return [c,g]}
+  // рӯ ба рӯ
+  let [c,g]=base();g.fillStyle='#5B4BB7';
+  const cx=300;
+  g.beginPath();g.ellipse(cx,130,48,60,0,0,7);g.fillStyle='#E8B894';g.fill();
+  g.fillStyle='#3B2A22';g.beginPath();g.ellipse(cx,105,52,40,0,Math.PI,0);g.fill();
+  g.fillStyle='#E8B894';g.fillRect(cx-18,185,36,30);
+  g.fillStyle='#A3305F';g.beginPath();g.moveTo(cx-108,232);g.quadraticCurveTo(cx,205,cx+108,232);g.lineTo(cx+96,360);g.lineTo(cx+76,470);g.lineTo(cx+102,600);g.lineTo(cx-102,600);g.lineTo(cx-76,470);g.lineTo(cx-96,360);g.closePath();g.fill();
+  g.strokeStyle='#A3305F';g.lineWidth=40;g.lineCap='round';g.beginPath();g.moveTo(cx-102,250);g.lineTo(cx-128,420);g.lineTo(cx-136,560);g.stroke();g.beginPath();g.moveTo(cx+102,250);g.lineTo(cx+128,420);g.lineTo(cx+136,560);g.stroke();
+  g.fillStyle='#E8B894';g.beginPath();g.arc(cx-136,585,20,0,7);g.fill();g.beginPath();g.arc(cx+136,585,20,0,7);g.fill();
+  g.fillStyle='#2B2420';g.beginPath();g.moveTo(cx-102,598);g.lineTo(cx+102,598);g.lineTo(cx+88,1090);g.lineTo(cx+20,1090);g.lineTo(cx,700);g.lineTo(cx-20,1090);g.lineTo(cx-88,1090);g.closePath();g.fill();
+  g.fillStyle='#1B1512';g.fillRect(cx-96,1088,78,22);g.fillRect(cx+18,1088,78,22);
+  DEMO.front=c.toDataURL('image/jpeg',.9);
+  DEMO.fp={head:{x:cx,y:68},heel:{x:cx-54,y:1110},neck:{x:cx,y:212},shL:{x:cx-104,y:236},shR:{x:cx+104,y:236},chL:{x:cx-98,y:330},chR:{x:cx+98,y:330},waL:{x:cx-76,y:470},waR:{x:cx+76,y:470},hiL:{x:cx-100,y:585},hiR:{x:cx+100,y:585},wrist:{x:cx+136,y:565},crotch:{x:cx,y:700}};
+  // паҳлу
+  [c,g]=base();
+  g.fillStyle='#E8B894';g.beginPath();g.ellipse(cx,130,44,60,0,0,7);g.fill();g.fillStyle='#3B2A22';g.beginPath();g.ellipse(cx-8,108,48,44,0,Math.PI*0.95,Math.PI*2.05);g.fill();
+  g.fillStyle='#E8B894';g.fillRect(cx-16,185,32,32);
+  g.fillStyle='#A3305F';g.beginPath();g.moveTo(cx-48,225);g.quadraticCurveTo(cx+20,210,cx+66,250);g.quadraticCurveTo(cx+80,330,cx+64,360);g.lineTo(cx+50,470);g.quadraticCurveTo(cx+76,560,cx+60,600);g.lineTo(cx-76,600);g.quadraticCurveTo(cx-90,540,cx-62,470);g.lineTo(cx-60,360);g.quadraticCurveTo(cx-66,280,cx-48,225);g.fill();
+  g.strokeStyle='#8E2A53';g.lineWidth=38;g.lineCap='round';g.beginPath();g.moveTo(cx,250);g.lineTo(cx+6,420);g.lineTo(cx+10,560);g.stroke();
+  g.fillStyle='#2B2420';g.beginPath();g.moveTo(cx-74,598);g.lineTo(cx+60,598);g.lineTo(cx+44,1090);g.lineTo(cx-40,1090);g.closePath();g.fill();
+  g.fillStyle='#1B1512';g.fillRect(cx-44,1088,120,22);
+  DEMO.side=c.toDataURL('image/jpeg',.9);
+  DEMO.sp={head:{x:cx,y:68},heel:{x:cx-40,y:1110},chF:{x:cx+74,y:330},chB:{x:cx-62,y:330},waF:{x:cx+50,y:470},waB:{x:cx-62,y:470},hiF:{x:cx+70,y:570},hiB:{x:cx-84,y:570}};
+}
+
+/* ===================== ҲИСОБИ АНДОЗАҲО АЗ НУҚТАҲО ===================== */
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function ellipseC(w,d){const a=w/2,b=d/2;return Math.PI*(3*(a+b)-Math.sqrt((3*a+b)*(a+3*b)))}
+function fromPoints(H,gender,fp,sp){
+  const sF=H/Math.abs(fp.heel.y-fp.head.y);
+  const sS=sp?H/Math.abs(sp.heel.y-sp.head.y):null;
+  const w=(a,b)=>Math.abs(fp[b].x-fp[a].x)*sF;
+  const chestW=w('chL','chR'),waistW=w('waL','waR'),hipW=w('hiL','hiR');
+  const dep=(a,b,ratio,width)=>sp?Math.abs(sp[b].x-sp[a].x)*sS:width*ratio;
+  const chestD=dep('chF','chB',0.72,chestW),waistD=dep('waF','waB',0.78,waistW),hipD=dep('hiF','hiB',0.8,hipW);
+  const m={height:H};
+  m.chest=ellipseC(chestW,chestD);m.waist=ellipseC(waistW,waistD);m.hips=ellipseC(hipW,hipD);
+  m.shoulder=dist(fp.shL,fp.shR)*sF;
+  m.arm=dist(fp.shR,fp.wrist)*sF+1;
+  const waY=(fp.waL.y+fp.waR.y)/2;
+  m.back=(waY-fp.neck.y)*sF+1.5;
+  m.front=m.back+(gender==='f'?3:1.5);
+  m.inseam=Math.abs(fp.heel.y-fp.crotch.y)*sF;
+  m.outseam=Math.abs(fp.heel.y-waY)*sF;
+  // аз таносуб
+  m.neck=m.chest*(gender==='f'?0.36:0.39);
+  m.bicep=m.chest*0.31;
+  m.wrist=H*(gender==='f'?0.093:0.103);
+  m.thigh=m.hips*0.59;
+  m.pocha=m.thigh*0.72;
+  const src={};MKEYS.forEach(k=>src[k]='photo');['neck','bicep','wrist','thigh','pocha'].forEach(k=>src[k]='ratio');src.height='input';
+  if(!sp){['chest','waist','hips'].forEach(k=>src[k]='photo1')}
+  MKEYS.forEach(k=>m[k]=r1(m[k]));
+  return {m,src};
+}
+
+/* ===================== ҚОЛИБҲО (ВЫКРОЙКА) ===================== */
+function draft(g,m,opt){
+  const pcs=[];const L=+opt.len;
+  if(g==='skirt'){
+    const hq=m.hips/4+1,wq=m.waist/4+1,dart=Math.max(0,Math.min(4,hq-wq-1.5)),side=hq-wq-dart;
+    const half=(cb)=>[[0,0],[wq+dart,0.6],[hq,20],[hq+(cb?0:0),L],[0,L]];
+    pcs.push({n:'Пеш',cnt:1,fold:true,pts:half(false),darts:[[ (wq+dart)/2, 0, dart, 11]],note:`дар қат · сабдӯзӣ ${r1(dart)}×11`});
+    pcs.push({n:'Пушт',cnt:2,fold:false,pts:half(true),darts:[[(wq+dart)/2,0,dart,13]],note:`ҷуфт · сабдӯзӣ ${r1(dart)}×13 · зиппер 18 см`});
+    pcs.push({n:'Камарбанд',cnt:1,fold:false,pts:[[0,0],[m.waist+4,0],[m.waist+4,8],[0,8]],note:'дарозӣ миён + 4 см'});
+    return pcs;
+  }
+  if(g==='pants'){
+    const rise=Math.max(18,m.outseam-m.inseam),Lp=+opt.len||m.outseam;
+    const knee=m.pocha*1.12;
+    const mk=(front)=>{
+      const W2=front?m.hips/4-1:m.hips/4+1,ext=front?m.hips/20+0.5:m.hips/10,wt=front?m.waist/4+1:m.waist/4+3;
+      const kw=front?knee/2-1:knee/2+1,hw=front?m.pocha/2-1:m.pocha/2+1;
+      const xc=(ext+W2)/2,ky=rise+(Lp-rise)/2-5;
+      return [[ext+(front?0.5:2),0],[ext+wt,0],[ext+W2,18],[ext+W2,rise],[xc+kw/2,ky],[xc+hw/2,Lp],[xc-hw/2,Lp],[xc-kw/2,ky],[0,rise],[ext*0.3,rise-2],[ext,rise-7]];
+    };
+    pcs.push({n:'Пеши шим',cnt:2,fold:false,pts:mk(true),note:'ҷуфт (чапу рост)'});
+    pcs.push({n:'Пушти шим',cnt:2,fold:false,pts:mk(false),note:'ҷуфт · сабдӯзӣ 2×10'});
+    pcs.push({n:'Камарбанд',cnt:1,fold:false,pts:[[0,0],[m.waist+5,0],[m.waist+5,8],[0,8]],note:'миён + 5 см'});
+    return pcs;
+  }
+  // курта / куртаи мардона
+  const men=g==='shirt';
+  const B=m.chest/4+(men?3:3.5),AD=m.chest/10+(men?11.5:10.5),NW=m.neck/6+0.5,NDf=NW+(men?1.5:2.5),sh=m.shoulder/2,flare=men?0:3.5;
+  const body=(nd,stand)=>[[0,nd],[NW*0.5,nd*0.88],[NW*0.85,nd*0.5],[NW,0],[sh,4],[sh-0.7,AD*0.38],[sh-0.9,AD*0.66],[sh+(B-sh)*0.35,AD*0.93],[B,AD],[B,AD+8],[B+flare,L],[-stand,L],[-stand,nd]];
+  if(men){
+    pcs.push({n:'Пеш',cnt:2,fold:false,pts:body(NDf,2.5),note:'ҷуфт · +2.5 см барои тугма'});
+  }else{
+    pcs.push({n:'Пеш',cnt:1,fold:true,pts:body(NDf,0),note:`дар қат · гиребони пеш ${r1(NDf)} см`});
+  }
+  pcs.push({n:'Пушт',cnt:1,fold:true,pts:body(2,0),note:'дар қат'});
+  const cap=AD-4.5,sw=m.bicep+(men?7:6),bw=m.wrist+(men?2:12),al=+opt.sleeve||m.arm;
+  pcs.push({n:'Остин',cnt:2,fold:false,pts:[[0,cap],[sw*0.12,cap*0.7],[sw*0.25,cap*0.32],[sw*0.38,cap*0.08],[sw/2,0],[sw*0.62,cap*0.08],[sw*0.75,cap*0.32],[sw*0.88,cap*0.7],[sw,cap],[sw-(sw-bw)/2,al],[(sw-bw)/2,al]],note:`дарозӣ ${r1(al)} см`});
+  if(men){
+    pcs.push({n:'Гиребон',cnt:2,fold:false,pts:[[0,0],[m.neck+3,0],[m.neck+3,7],[0,7]],note:'гардан + 3 см'});
+    pcs.push({n:'Сардаст',cnt:2,fold:false,pts:[[0,0],[m.wrist+6,0],[m.wrist+6,10],[0,10]],note:'банди даст + 6 см'});
+  }else{
+    pcs.push({n:'Рӯяи гиребон',cnt:1,fold:true,pts:[[0,0],[NW+4,0],[NW+4,NDf+4],[0,NDf+4]],note:'дар қат'});
+  }
+  return pcs;
+}
+function bbox(pts){const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);return{x0:Math.min(...xs),y0:Math.min(...ys),x1:Math.max(...xs),y1:Math.max(...ys)}}
+function layout(pcs,FW,s){
+  // ҳар порча бо кромка; порчаҳои «дар қат» кушода ҳисоб мешаванд
+  const items=[];let split=false;
+  pcs.forEach(p=>{const b=bbox(p.pts);let w=(b.x1-b.x0)*(p.fold?2:1)+2*s,h=(b.y1-b.y0)+2*s+(['Пеш','Пушт','Пеши шим','Пушти шим'].includes(p.n)?2.5:0);
+    for(let i=0;i<p.cnt;i++){
+      if(w>FW-2){const parts=Math.ceil(w/(FW-2-2*s));split=true;for(let k=0;k<parts;k++)items.push({n:p.n+' ('+(k+1)+'/'+parts+')',w:w/parts+2*s,h})}
+      else items.push({n:p.n,w,h});
+    }});
+  items.sort((a,b)=>b.h-a.h);
+  let x=0,y=0,shelf=0;const placed=[];
+  items.forEach(it=>{if(x+it.w>FW){x=0;y+=shelf;shelf=0}placed.push({...it,x,y});x+=it.w;shelf=Math.max(shelf,it.h)});
+  const len=y+shelf;const need=Math.ceil((len+10)/5)*5;
+  return{placed,len,need,split};
+}
+function pieceSVG(p,s){
+  const b=bbox(p.pts);const pad=6;const W=(b.x1-b.x0)+pad*2,H=(b.y1-b.y0)+pad*2+6;
+  const tx=x=>x-b.x0+pad,ty=y=>y-b.y0+pad;
+  const path=p.pts.map((q,i)=>(i?'L':'M')+r1(tx(q[0]))+' '+r1(ty(q[1]))).join(' ')+' Z';
+  let darts='';(p.darts||[]).forEach(d=>{const [x,y,w,h]=d;darts+=`<path d="M${r1(tx(x-w/2))} ${r1(ty(y))} L${r1(tx(x))} ${r1(ty(y+h))} L${r1(tx(x+w/2))} ${r1(ty(y))}" fill="none" stroke="#A3305F" stroke-width="0.4"/>`});
+  const fold=p.fold?`<line x1="${r1(tx(0))}" y1="${r1(ty(p.pts[0][0]===0?p.pts[0][1]:b.y0))}" x2="${r1(tx(0))}" y2="${r1(ty(b.y1))}" stroke="#1F7A72" stroke-width="0.6" stroke-dasharray="2 1.2"/>`:'';
+  const fs=Math.max(1.3,Math.min(4.2,W/14,(H-6)/5));
+  return `<svg viewBox="0 0 ${r1(W)} ${r1(H)}" xmlns="http://www.w3.org/2000/svg"><rect width="100%" height="100%" fill="#FFFDF9"/>
+  <path d="${path}" fill="#F6E4EC" stroke="#2B2420" stroke-width="0.5" stroke-linejoin="round"/>${darts}${fold}
+  <text x="${r1(W/2)}" y="${r1(ty((b.y0+b.y1)/2))}" font-size="${fs}" text-anchor="middle" font-family="Inter,Arial" font-weight="700" fill="#2B2420">${p.n} ×${p.cnt}</text>
+  <text x="${r1(W/2)}" y="${r1(ty((b.y0+b.y1)/2)+fs*1.3)}" font-size="${fs*0.75}" text-anchor="middle" font-family="Inter,Arial" fill="#7A6E66">${r1(b.x1-b.x0)} × ${r1(b.y1-b.y0)} см</text>
+  ${p.fold?`<text x="${r1(tx(0)+1.2)}" y="${r1(H-3)}" font-size="${fs*0.6}" font-family="Inter,Arial" fill="#1F7A72">◀ қат</text>`:''}
+  <text x="${r1(W-2)}" y="${r1(H-1.5)}" font-size="${fs*0.55}" text-anchor="end" font-family="Inter,Arial" fill="#A39689">+${s} см кромка</text></svg>`;
+}
+function layoutSVG(L,FW){
+  const H=Math.max(L.len,20)+4;const cols=['#F6E4EC','#DDF0EC','#FBF0D6','#E6E1F7','#E1ECF8','#F8E1DC'];
+  let r='';L.placed.forEach((p,i)=>{r+=`<rect x="${r1(p.x+0.5)}" y="${r1(p.y+0.5)}" width="${r1(p.w-1)}" height="${r1(p.h-1)}" rx="1.5" fill="${cols[i%cols.length]}" stroke="#2B2420" stroke-width="0.35"/><text x="${r1(p.x+p.w/2)}" y="${r1(p.y+p.h/2)}" font-size="${Math.min(5,p.w/7)}" text-anchor="middle" font-family="Inter,Arial" font-weight="700" fill="#2B2420">${p.n}</text>`});
+  return `<svg viewBox="-2 -2 ${FW+4} ${H}" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="${FW}" height="${H-4}" fill="#FFFDF9" stroke="#C27A1A" stroke-width="0.6" stroke-dasharray="3 2"/>${r}</svg>`;
+}
+
+/* ===================== RENDER ===================== */
+const ICONS={
+ home:'<path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ clients:'<circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.4 3.5 5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+ orders:'<path d="M6 3h12l1 18H5zM9 7a3 3 0 0 0 6 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ ai:'<path d="M12 3l1.8 4.6L18.5 9l-4.7 1.6L12 15l-1.8-4.4L5.5 9l4.7-1.4z M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'
+};
+function render(){
+  const a=document.getElementById('app');
+  if(view==='measure'){a.innerHTML=measureView();bindMark();return}
+  if(view==='client'){a.innerHTML=clientView();return}
+  if(view==='pattern'){a.innerHTML=patternView();return}
+  a.innerHTML=`<header class="top"><div class="brand"><div class="logo"><span class="mk">✂️</span>Дарзӣ <small>AI</small></div><span class="aistat">${aiBadge()}</span></div><div class="tape"></div></header>
+  <main style="${tab==='ai'?'padding-bottom:170px':''}">${({home,clients:clientsView,orders:ordersView,ai:aiView})[tab]()}</main>
+  <nav>${[['home','Асосӣ'],['clients','Мизоҷон'],['fab',''],['orders','Фармоишҳо'],['ai','Ёрдамчӣ']].map(([k,l])=>k==='fab'?`<button onclick="startMeasure()" aria-label="Ченкунии нав"><span class="fab">＋</span></button>`:`<button class="${tab===k?'on':''}" onclick="tab='${k}';view=null;render();scrollTo(0,0)"><svg viewBox="0 0 24 24">${ICONS[k]}</svg>${l}</button>`).join('')}</nav>
+  ${tab==='ai'?composer():''}`;
+  if(tab==='ai'){const el=document.getElementById('chatend');if(el)el.scrollIntoView()}
+}
+function home(){
+  const act=S.orders.filter(o=>o.st<4);const soon=act.slice().sort((a,b)=>(a.due||'9').localeCompare(b.due||'9')).slice(0,3);
+  return `<div class="hero"><h1>Салом, устод! ✂️</h1><p class="muted" style="margin-top:4px">Акс гиред — зеҳни сунъӣ андозаҳоро мегирад ва қолибро тайёр мекунад.</p>
+   <div class="stats"><div class="stat"><b>${S.clients.length}</b><span>мизоҷ</span></div><div class="stat"><b>${act.length}</b><span>фармоиш</span></div><div class="stat"><b>${S.clients.reduce((a,c)=>a+(c.meas||[]).length,0)}</b><span>ченкунӣ</span></div></div>
+   <button class="btn" style="margin-top:14px" onclick="startMeasure()">📸 Ченкунии нав бо акс</button></div>
+  <h2>Чӣ кор карда метавонад</h2>
+  <div class="feat">
+   <div class="fe" onclick="startMeasure()"><div class="ic" style="background:var(--plumL)">📐</div><h3>Андоза аз акс</h3><p class="muted">2 акс + қад → 15 андоза</p></div>
+   <div class="fe" onclick="tab='clients';render()"><div class="ic" style="background:var(--saffL)">🧵</div><h3>Қолиб (выкройка)</h3><p class="muted">доман, шим, курта</p></div>
+   <div class="fe" onclick="tab='clients';render()"><div class="ic" style="background:var(--tealL)">📏</div><h3>Ҳисоби матоъ</h3><p class="muted">чанд метр лозим</p></div>
+   <div class="fe" onclick="tab='ai';render()"><div class="ic" style="background:#E6E1F7">✨</div><h3>Ёрдамчии ЗС</h3><p class="muted">саволҳои дӯзандагӣ</p></div>
+  </div>
+  ${soon.length?`<h2>Фармоишҳои наздик</h2>${soon.map(orderCard).join('')}`:''}
+  ${S.clients.length?`<h2>Мизоҷони охирин</h2>${S.clients.slice(-3).reverse().map(clientCard).join('')}`:`<div class="note" style="margin-top:16px">Ҳоло мизоҷ нест. Тугмаи <b>＋</b>-ро пахш кунед ё бо <b>«Намуна»</b> санҷед.</div>`}`;
+}
+function clientCard(c){const m=lastM(c);return `<div class="card row" style="cursor:pointer" onclick="openClient('${c.id}')">${ava(c)}<div style="flex:1;min-width:0"><h3>${esc(c.name)}</h3><p class="muted">${c.gender==='f'?'зан':'мард'} · ${m?`сина ${r0(m.m.chest)} · миён ${r0(m.m.waist)} · сурин ${r0(m.m.hips)}`:'андоза нест'}</p></div><span style="color:var(--muted);font-size:20px">›</span></div>`}
+function clientsView(){
+  return `<div class="row between"><h1>Мизоҷон</h1><button class="btn sm" onclick="startMeasure()">＋ Нав</button></div>
+  <div style="margin-top:14px">${S.clients.slice().reverse().map(clientCard).join('')||'<p class="muted">Ҳоло мизоҷ нест.</p>'}</div>`;
+}
+function openClient(id){cur=id;view='client';render();scrollTo(0,0)}
+function clientView(){
+  const c=C(cur),m=lastM(c);
+  return `<main><div class="row between"><button class="back" onclick="view=null;render()">←</button><button class="btn sm ghost" onclick="delClient('${c.id}')">🗑️</button></div>
+  <div class="row" style="margin-top:14px;gap:14px">${ava(c,64)}<div><h1>${esc(c.name)}</h1><p class="muted">${c.gender==='f'?'зан':'мард'}${c.phone?' · '+esc(c.phone):''}</p></div></div>
+  ${m?`<h2>Андозаҳо <span class="tag ${m.src==='ai'?'t-plum':m.src==='points'?'t-saff':''}">${m.src==='ai'?'✨ ЗС':m.src==='points'?'📍 аз нуқтаҳо':'✍️ дастӣ'}</span> <span class="muted" style="font-weight:500">${fmtDate(m.date)}</span></h2>
+   <table class="m">${MKEYS.map(k=>`<tr><td>${ML[k]}</td><td style="text-align:right"><b>${r1(m.m[k])}</b> <span class="muted">см</span></td></tr>`).join('')}</table>
+   <h2>Қолиб тайёр кунед</h2><div class="garm">${Object.entries(GARM).map(([k,g])=>`<div class="gm" onclick="openPattern('${c.id}','${k}')"><div class="e">${g.e}</div><h3>${g.n}</h3><p class="muted" style="font-size:12px">${g.d}</p></div>`).join('')}</div>
+   <button class="btn light" style="margin-top:12px" onclick="startMeasure('${c.id}')">📸 Андозаи нав</button>`
+  :`<div class="note" style="margin-top:14px">Андоза нест.</div><button class="btn" style="margin-top:12px" onclick="startMeasure('${c.id}')">📸 Андоза гирифтан</button>`}
+  ${S.orders.filter(o=>o.cid===c.id).length?`<h2>Фармоишҳо</h2>${S.orders.filter(o=>o.cid===c.id).map(orderCard).join('')}`:''}
+  </main>`;
+}
+function delClient(id){if(!S.__del||S.__del!==id){S.__del=id;toast('Барои нест кардан боз пахш кунед');return}S.clients=S.clients.filter(c=>c.id!==id);S.orders=S.orders.filter(o=>o.cid!==id);delete S.__del;save();view=null;tab='clients';render()}
+
+/* ===================== ЧЕНКУНӢ (WIZARD) ===================== */
+function startMeasure(cid){const c=cid?C(cid):null;M={step:0,cid:cid||null,name:c?c.name:'',phone:c?c.phone:'',gender:c?c.gender:'f',H:(lastM(c)&&lastM(c).m.height)||'',front:null,side:null,fp:{},sp:{},which:'front',idx:0,res:null,src:null,demo:false,quality:null,issues:[],note:''};view='measure';render();scrollTo(0,0)}
+function stepsBar(n){return `<div class="steps">${[0,1,2,3].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</div>`}
+function measureView(){
+  const st=M.step;
+  let h=`<main style="padding-bottom:40px"><div class="row between"><button class="back" onclick="mBack()">←</button><span class="muted" style="font-weight:700">Ченкунии нав</span><span style="width:40px"></span></div>${stepsBar(st===4?3:Math.min(st,3))}`;
+  if(st===0){
+    h+=`<h1>Мизоҷ</h1>
+    <label class="f">Ному насаб</label><input type="text" id="mn" value="${esc(M.name)}" oninput="M.name=this.value">
+    <label class="f">Телефон (ихтиёрӣ)</label><input type="tel" value="${esc(M.phone)}" oninput="M.phone=this.value">
+    <label class="f">Ҷинс</label><div class="seg"><button class="${M.gender==='f'?'on':''}" onclick="M.gender='f';render()">👩 Зан</button><button class="${M.gender==='m'?'on':''}" onclick="M.gender='m';render()">👨 Мард</button></div>
+    <label class="f">Қад, см (бо сантиметр чен кунед)</label><input type="number" inputmode="decimal" value="${esc(M.H)}" placeholder="масалан 165" oninput="M.H=this.value">
+    <p class="muted" style="margin-bottom:14px">Қад ҳамчун «чен» хизмат мекунад: ҳамаи андозаҳо аз рӯи он ҳисоб мешаванд.</p>
+    <button class="btn" onclick="mNext0()">Давом →</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="loadDemo()">🧍 Намуна (манекен) бо акси тайёр</button>`;
+  }
+  if(st===1){
+    h+=`<h1>Ду акс гиред</h1><p class="muted" style="margin:4px 0 12px">Пурра аз сар то пой, дар масофаи 2–3 метр.</p>
+    <div class="photos">
+     <label class="ph">${M.front?`<img src="${M.front.url}" alt="Акси рӯ ба рӯ">`:''}<span class="lbl">1 · Рӯ ба рӯ</span>${M.front?'':'<span style="font-size:34px">🧍</span>Акси рӯ ба рӯ<br><span style="font-weight:500">дастҳо каме дур аз бадан</span>'}<input type="file" accept="image/*" capture="environment" onchange="pick(this,'front')"></label>
+     <label class="ph">${M.side?`<img src="${M.side.url}" alt="Акси паҳлу">`:''}<span class="lbl">2 · Паҳлу</span>${M.side?'':'<span style="font-size:34px">🚶</span>Акси паҳлу<br><span style="font-weight:500">барои чуқурии бадан</span>'}<input type="file" accept="image/*" capture="environment" onchange="pick(this,'side')"></label>
+    </div>
+    <div class="tips">💡 <b>Барои андозаи дақиқ:</b><br>• либоси танг ё сабук; ҷомаи васеъ андозаро калон мекунад<br>• рост истед, пойҳо ҷуфт, нигоҳ ба пеш<br>• телефон дар баландии камар, рост нигоҳ доред<br>• замина оддӣ ва равшан</div>
+    <button class="btn" style="margin-top:14px" ${M.front?'':'disabled'} onclick="M.step=2;render()">Давом →</button>`;
+  }
+  if(st===2){
+    const canAI=AI&&AIimg;
+    h+=`<h1>Кӣ чен кунад?</h1><p class="muted" style="margin:4px 0 14px">Ду роҳ ҳаст — ҳардуро метавонед санҷед.</p>
+    <div class="card" style="border:2px solid ${canAI?'var(--plum)':'var(--line)'}"><div class="row"><div class="ava" style="background:var(--plum)">✨</div><div style="flex:1"><h3>Зеҳни сунъӣ</h3><p class="muted">ЗС аксҳоро таҳлил карда, ҳамаи 15 андозаро худаш муайян мекунад.</p></div></div>
+     ${canAI?`<button class="btn" style="margin-top:12px" onclick="runAI()">✨ Таҳлил бо ЗС</button>`:`<p class="warn" style="margin-top:10px">ЗС ҳоло дастрас нест (офлайн ё бе пайвастшавӣ). Роҳи дуюмро истифода баред.</p>`}</div>
+    <div class="card"><div class="row"><div class="ava" style="background:var(--saffron);color:var(--ink)">📍</div><div style="flex:1"><h3>Нуқтагузорӣ (офлайн)</h3><p class="muted">Шумо ба нуқтаҳои бадан ламс мекунед — барнома ҳамаашро худаш ҳисоб мекунад. Бе интернет кор мекунад.</p></div></div>
+     <button class="btn ${canAI?'ghost':'saff'}" style="margin-top:12px" onclick="M.step=3;M.which='front';M.idx=Object.keys(M.fp).length;render()">📍 Нуқтагузорӣ</button></div>`;
+  }
+  if(st===3){
+    const list=M.which==='front'?FRONT_PTS:SIDE_PTS,pts=M.which==='front'?M.fp:M.sp,img=M.which==='front'?M.front:M.side;
+    const done=M.idx>=list.length;
+    h+=`<h1 style="font-size:22px">${M.which==='front'?'Акси рӯ ба рӯ':'Акси паҳлу'}</h1>
+    ${done?`<div class="note" style="margin:10px 0">✅ Ҳамаи нуқтаҳо гузошта шуданд.</div>`:`<div class="ask"><span class="n">${M.idx+1}/${list.length}</span><div style="flex:1">Ламс кунед: <b>${list[M.idx][1]}</b></div></div>`}
+    <div class="mark" id="mark" style="width:min(100%, calc(66vh * ${img.w/img.h}));margin:0 auto"><img src="${img.url}" alt="">${list.map(([k,l],i)=>pts[k]?`<div class="pt" style="left:${pts[k].x/img.w*100}%;top:${pts[k].y/img.h*100}%;background:${i<2?'#C2412D':i%2?'#E0A526':'#A3305F'}"><b>${l.split(' — ')[0].split(' (')[0]}</b></div>`:'').join('')}</div>
+    <div class="row" style="margin-top:10px"><button class="btn ghost" onclick="undoPt()">↶ Бозгашт</button>${done?`<button class="btn" onclick="ptsDone()">${M.which==='front'&&M.side?'Акси паҳлу →':'Ҳисоб кардан →'}</button>`:''}</div>
+    ${M.which==='side'?`<button class="btn ghost" style="margin-top:8px" onclick="M.sp={};finishPoints()">Бе акси паҳлу ҳисоб кунед</button>`:''}`;
+  }
+  if(st===5){
+    h+=`<div class="ai-load"><div class="scan"><img src="${M.front.url}" alt=""></div><h1 style="font-size:22px">ЗС аксро таҳлил мекунад…</h1><p class="muted" style="margin-top:6px">китф, сина, миён, сурин, дарозии остин ва шим</p></div>`;
+  }
+  if(st===4){
+    const r=M.res;
+    h+=`<h1>Андозаҳо тайёр</h1><p class="muted" style="margin:4px 0 10px">${M.src==='ai'?'✨ ЗС муайян кард':'📍 Аз нуқтаҳо ҳисоб шуд'} · ҳар рақамро ислоҳ кардан мумкин аст</p>
+    ${M.quality==='poor'||M.issues.length?`<div class="warn" style="margin-bottom:10px">⚠️ ${M.issues.map(esc).join('<br>')||'Сифати акс паст аст.'}</div>`:''}
+    ${M.note?`<div class="note" style="margin-bottom:10px">${esc(M.note)}</div>`:''}
+    <table class="m">${MKEYS.map(k=>`<tr><td>${ML[k]}<br><span class="src">${({photo:'аз акс',photo1:'аз 1 акс + таносуб',ratio:'аз таносуб',input:'воридшуда',ai:'ЗС'})[r.src[k]]||''}</span></td><td style="text-align:right"><input type="number" inputmode="decimal" value="${r.m[k]}" oninput="M.res.m['${k}']=+this.value"> <span class="muted">см</span></td></tr>`).join('')}</table>
+    <div class="tips">📏 Андозаҳо <b>тахминӣ</b> мебошанд (хатои маъмулӣ ±2–4 см). Пеш аз буридан 2–3 андозаи асосиро бо сантиметр санҷед: сина, миён, сурин.</div>
+    <button class="btn" style="margin-top:14px" onclick="saveMeasure()">💾 Нигоҳ доштан</button>`;
+  }
+  return h+'</main>';
+}
+function mBack(){if(M.step===0||M.step===4&&false){view=M.cid?'client':null;if(!M.cid)tab='home';render();return}if(M.step===4){M.step=M.src==='ai'?2:3;render();return}if(M.step===5){return}M.step--;render()}
+function mNext0(){if(!M.name.trim()){toast('Номи мизоҷро нависед');return}const H=+M.H;if(!(H>=80&&H<=230)){toast('Қадро дуруст нависед (80–230 см)');return}M.step=1;render()}
+async function pick(inp,which){const f=inp.files&&inp.files[0];if(!f)return;try{M[which]=await readImg(f,1400);if(which==='front')M.fp={};else M.sp={};M.demo=false;render()}catch(e){toast('Аксро хонда натавонистем')}}
+function loadDemo(){if(!DEMO.front)demoImages();M.name=M.name||'Намуна — манекен';M.H=DEMO.H;M.gender='f';M.front={url:DEMO.front,w:600,h:1200};M.side={url:DEMO.side,w:600,h:1200};M.fp={};M.sp={};M.demo=true;M.step=1;render();toast('Аксҳои намуна бор шуданд')}
+function bindMark(){
+  const el=document.getElementById('mark');if(!el)return;
+  el.addEventListener('pointerdown',e=>{
+    const list=M.which==='front'?FRONT_PTS:SIDE_PTS,pts=M.which==='front'?M.fp:M.sp,img=M.which==='front'?M.front:M.side;
+    if(M.idx>=list.length)return;
+    const r=el.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*img.w,y=(e.clientY-r.top)/r.height*img.h;
+    pts[list[M.idx][0]]={x,y};M.idx++;render();
+  });
+}
+function undoPt(){const list=M.which==='front'?FRONT_PTS:SIDE_PTS,pts=M.which==='front'?M.fp:M.sp;if(M.idx>0){M.idx--;delete pts[list[M.idx][0]];render()}else if(M.which==='side'){M.which='front';M.idx=FRONT_PTS.length;render()}}
+function ptsDone(){if(M.which==='front'&&M.side){M.which='side';M.idx=Object.keys(M.sp).length;render();scrollTo(0,0);return}finishPoints()}
+function finishPoints(){
+  const sp=Object.keys(M.sp).length===SIDE_PTS.length?M.sp:null;
+  try{const r=fromPoints(+M.H,M.gender,M.fp,sp);M.res=r;M.src='points';M.quality=null;M.issues=sp?[]:['Акси паҳлу истифода нашуд: давраҳо аз таносуб ҳисоб шуданд — бештар санҷед.'];M.note='';M.step=4;render();scrollTo(0,0)}
+  catch(e){toast('Хато дар ҳисоб — нуқтаҳоро санҷед')}
+}
+async function runAI(){
+  M.step=5;render();scrollTo(0,0);
+  const H=+M.H;
+  const prompt=`Ту мутахассиси андозагирии бадан барои дӯзандагон ҳастӣ. Ба ту 1–2 акс дода мешавад: аввал аз рӯ ба рӯ${M.side?', баъд аз паҳлу':''}. Қади дақиқи одам ${H} см, ҷинс: ${M.gender==='f'?'зан':'мард'}.
+Қадро ҳамчун чен истифода бар ва аз таносуби бадан дар акс андозаҳоро бо сантиметр тахмин кун. Либоси васеъро ба ҳисоб гир (бадан аз либос хурдтар аст).
+Агар акс барои ченкунӣ мувофиқ набошад (бадан пурра нест, одам нест, акс хира, ҳолати каҷ), quality="poor" гузор ва сабабро дар issues ба забони тоҷикӣ навис.
+Танҳо JSON баргардон, бе ягон матни дигар, бо ҳамин сохтор:
+{"quality":"good|fair|poor","issues":["..."],"m":{"neck":0,"shoulder":0,"chest":0,"waist":0,"hips":0,"arm":0,"bicep":0,"wrist":0,"back":0,"front":0,"inseam":0,"outseam":0,"thigh":0,"pocha":0},"note":"як ҷумлаи кӯтоҳ ба тоҷикӣ"}
+Маънои калидҳо: neck — давраи гардан; shoulder — паҳнои китф аз нӯг то нӯг; chest, waist, hips — давраи сина, миён, сурин; arm — аз нӯги китф то банди даст; bicep — давраи бозу; wrist — давраи банди даст; back — аз пойгоҳи гардан то миён аз пушт; front — аз пойгоҳи гардан то миён аз пеш; inseam — аз байни ронҳо то пошна; outseam — аз миён то пошна; thigh — давраи рон; pocha — давраи поёни шим.`;
+  try{
+    const imgs=[dataUrlToBlob(M.front.url)];if(M.side)imgs.push(dataUrlToBlob(M.side.url));
+    let out;
+    try{out=await AI.json(prompt,{images:imgs,modelTier:'complex'})}
+    catch(e){if(e&&e.code==='not_granted')throw e;const t=await AI(prompt,{images:imgs,modelTier:'complex'});const j=t.text.slice(t.text.indexOf('{'),t.text.lastIndexOf('}')+1);out=JSON.parse(j)}
+    const m={height:H};const src={height:'input'};
+    MKEYS.forEach(k=>{if(k==='height')return;const v=+(out.m&&out.m[k]);m[k]=v>0?r1(v):0;src[k]='ai'});
+    // санҷиши мантиқӣ: агар чизе намонад — аз таносуб
+    if(!(m.chest>40&&m.waist>30&&m.hips>40)){throw {code:'bad_output'}}
+    M.res={m,src};M.src='ai';M.quality=out.quality||'fair';M.issues=Array.isArray(out.issues)?out.issues.slice(0,4):[];M.note=out.note||'';M.step=4;render();scrollTo(0,0);
+  }catch(e){
+    M.step=2;render();
+    if(e&&e.code==='not_granted'){toast('Иҷозат барои ЗС дода нашуд');AI=null;render()}
+    else if(e&&e.code==='rate_limited')toast('ЗС банд аст — каме баъд боз кӯшиш кунед');
+    else toast('ЗС андозаро муайян карда натавонист — нуқтагузориро истифода баред');
+  }
+}
+async function saveMeasure(){
+  const rec={id:uid(),date:Date.now(),m:{...M.res.m},src:M.src,thumb:await thumbOf(M.front.url,160)};
+  let c=M.cid?C(M.cid):null;
+  if(!c){c={id:uid(),name:M.name.trim(),phone:M.phone,gender:M.gender,created:Date.now(),meas:[]};S.clients.push(c)}
+  else{c.name=M.name.trim()||c.name;c.gender=M.gender}
+  c.meas.push(rec);save();toast('Андозаҳо нигоҳ дошта шуданд ✓');cur=c.id;view='client';render();scrollTo(0,0);
+}
+
+/* ===================== ҚОЛИБ ===================== */
+function openPattern(cid,g){const c=C(cid),m=lastM(c).m;P={cid,g,fw:g==='kurta'?50:150,len:g==='skirt'?60:g==='pants'?r1(m.outseam):r1(g==='kurta'?m.height*0.62:m.height*0.45),sleeve:r1(m.arm),plan:null,planLoading:false};view='pattern';render();scrollTo(0,0)}
+function patternView(){
+  const c=C(P.cid),m=lastM(c).m,g=GARM[P.g];
+  const missing=g.need.filter(k=>!(m[k]>0));
+  let h=`<main><div class="row between"><button class="back" onclick="view='client';render()">←</button><span class="muted" style="font-weight:700">${esc(c.name)}</span><span style="width:40px"></span></div>
+  <h1 style="margin-top:12px">${g.e} ${g.n}</h1><p class="muted">${g.d}</p>`;
+  if(missing.length){return h+`<div class="warn" style="margin-top:12px">Андозаҳо намерасанд: ${missing.map(k=>ML[k]).join(', ')}</div></main>`}
+  const pcs=draft(P.g,m,{len:P.len,sleeve:P.sleeve});
+  const L=layout(pcs,P.fw,S.seam);
+  h+=`<div class="row" style="margin-top:12px;gap:8px"><div style="flex:1"><label class="f" style="margin-top:0">Дарозии либос, см</label><input type="number" value="${P.len}" onchange="P.len=+this.value;P.plan=null;render()"></div>${P.g==='kurta'||P.g==='shirt'?`<div style="flex:1"><label class="f" style="margin-top:0">Дарозии остин</label><input type="number" value="${P.sleeve}" onchange="P.sleeve=+this.value;P.plan=null;render()"></div>`:''}</div>
+  <label class="f">Бари матоъ</label><div class="seg">${FABRICS.map(f=>`<button class="${P.fw===f.w?'on':''}" onclick="P.fw=${f.w};P.plan=null;render()">${f.w===50?'Атлас 50':f.w}</button>`).join('')}</div>
+  <div class="card" style="margin-top:14px;text-align:center"><p class="muted">Матоъ лозим (бо захира)</p><div class="big">${(L.need/100).toFixed(2)} м</div><p class="muted">бари ${P.fw} см · ${L.placed.length} порча · кромка ${S.seam} см</p>${L.split?`<p class="tag t-saff" style="margin-top:8px">Матоъ танг аст — баъзе порчаҳо аз 2+ қисм дӯхта мешаванд</p>`:''}</div>
+  <h2>Порчаҳо</h2><div class="card">${pcs.map(p=>{const b=bbox(p.pts);return `<div class="piece"><span><b>${p.n}</b> ×${p.cnt}<br><span class="muted" style="font-size:12px">${p.note}</span></span><span style="text-align:right;font-weight:700">${r1(b.x1-b.x0)} × ${r1(b.y1-b.y0)}<br><span class="muted" style="font-size:12px">см</span></span></div>`}).join('')}</div>
+  <h2>Қолибҳо (выкройка)</h2>${pcs.map(p=>`<div class="svgbox" style="margin-bottom:10px">${pieceSVG(p,S.seam)}</div>`).join('')}
+  <h2>Тарҳи буриш дар матоъ</h2><div class="svgbox" style="max-height:520px">${layoutSVG(L,P.fw)}</div>
+  <p class="muted" style="margin-top:6px">Рахи зард — канори матоъ (бари ${P.fw} см). Ҳама порчаҳо бо самти тор (вдоль долевой).</p>
+  <h2>Нақшаи буриш ${AI?'аз ЗС':''}</h2>
+  ${P.plan?`<div class="card steplist">${P.plan.map(s=>`<div>${esc(s)}</div>`).join('')}</div>`:P.planLoading?`<div class="card"><p class="muted">✨ ЗС нақша тартиб медиҳад…</p></div>`:`<button class="btn ${AI?'':'ink'}" onclick="makePlan()">${AI?'✨ Нақшаи буришро ЗС тайёр кунад':'📋 Нақшаи буриш'}</button>`}
+  <div class="row" style="margin-top:12px"><button class="btn saff" onclick="saveSVG()">⬇️ Қолибро захира</button><button class="btn teal" onclick="newOrder()">🧾 Фармоиш</button></div>
+  </main>`;
+  return h;
+}
+function localPlan(pcs,L){
+  const g=GARM[P.g].n.toLowerCase();
+  return [
+    `Матоъро бишӯед ва дарзмол кунед (баъзе матоъҳо то 3–5% кашол мешаванд).`,
+    `Матоъро рӯяш ба дарун ${pcs.some(p=>p.fold)?'дар бари дарозӣ ду қат кунед; порчаҳои «дар қат»-ро ба қат гузоред':'паҳн кунед'}.`,
+    `Аз рӯи тарҳ ${L.placed.length} порчаро ҷойгир кунед — ҳама бо самти тор; дарозии матоъ ${(L.need/100).toFixed(2)} м.`,
+    `Хати қолибро бо бӯр кашед ва ҳар тараф ${S.seam} см кромка, дар поён 3–4 см барои пешпечак илова кунед.`,
+    ...pcs.map(p=>{const b=bbox(p.pts);return `${p.n} ×${p.cnt}: ${r1(b.x1-b.x0)}×${r1(b.y1-b.y0)} см — ${p.note}.`}),
+    `Нишонаҳоро (сабдӯзӣ, миёни пеш/пушт, ҷои тугма) бо бӯр ё сӯзан гузоред, пеш аз ҷудо кардани қолиб.`,
+    `Пеш аз дӯхтан ${g}-ро бо сӯзан ҷамъ карда ба мизоҷ пӯшонед ва андозаро санҷед.`];
+}
+async function makePlan(){
+  const c=C(P.cid),m=lastM(c).m,pcs=draft(P.g,m,{len:P.len,sleeve:P.sleeve}),L=layout(pcs,P.fw,S.seam);
+  if(!AI){P.plan=localPlan(pcs,L);render();return}
+  P.planLoading=true;render();
+  const prompt=`Ту устои дӯзанда ҳастӣ. Барои дӯзандаи ҷавон нақшаи буриши кӯтоҳ ва амалӣ навис, ба забони тоҷикӣ.
+Либос: ${GARM[P.g].n} (${GARM[P.g].d}). Мизоҷ: ${c.gender==='f'?'зан':'мард'}.
+Андозаҳо (см): ${MKEYS.map(k=>ML[k]+' '+r1(m[k])).join('; ')}.
+Порчаҳо: ${pcs.map(p=>{const b=bbox(p.pts);return `${p.n} ×${p.cnt} (${r1(b.x1-b.x0)}×${r1(b.y1-b.y0)} см, ${p.note})`}).join('; ')}.
+Матоъ: бари ${P.fw} см, лозим ${(L.need/100).toFixed(2)} м. Кромка ${S.seam} см.
+8–11 қадам навис: тайёр кардани матоъ, қат кардан, ҷойгиркунии порчаҳо, кашидан бо бӯр, кромкаҳо, буридан, нишонагузорӣ, санҷиши аввал. Рақамҳои дар боло бударо истифода бар, рақами нав набоф.
+Танҳо JSON: {"steps":["...","..."]}`;
+  try{const o=await AI.json(prompt,{modelTier:'default'});P.plan=(o.steps||[]).slice(0,12);if(!P.plan.length)throw 0}
+  catch(e){P.plan=localPlan(pcs,L);toast('ЗС ҷавоб надод — нақшаи стандартӣ')}
+  P.planLoading=false;render();
+}
+async function saveSVG(){
+  const c=C(P.cid),m=lastM(c).m,pcs=draft(P.g,m,{len:P.len,sleeve:P.sleeve}),L=layout(pcs,P.fw,S.seam);
+  // ҳамаи порчаҳо дар андозаи воқеӣ (1 воҳид = 1 см) барои чоп
+  let x=0,parts='',maxH=0;pcs.forEach(p=>{const b=bbox(p.pts);const w=b.x1-b.x0+12,h=b.y1-b.y0+18;parts+=`<g transform="translate(${r1(x)} 0)">${pieceSVG(p,S.seam).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'').replace('<rect width="100%" height="100%" fill="#FFFDF9"/>','')}</g>`;x+=w+4;maxH=Math.max(maxH,h)});
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${r1(x)}cm" height="${r1(maxH)}cm" viewBox="0 0 ${r1(x)} ${r1(maxH)}">${parts}</svg>`;
+  const fn=`qolib-${GARM[P.g].n.replace(/\s/g,'_')}-${c.name.replace(/\s/g,'_')}.svg`;
+  try{
+    if(window.AndroidBridge){AndroidBridge.share(fn,svg);return}
+    if(DL){await DL.save({filename:fn,data:new Blob([svg],{type:'image/svg+xml'})});toast('Захира шуд ✓');return}
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));a.download=fn;document.body.appendChild(a);a.click();a.remove();toast('Файл захира шуд ✓');
+  }catch(e){toast('Захира нашуд')}
+}
+/* ===================== ФАРМОИШҲО ===================== */
+function newOrder(){
+  const c=C(P.cid),m=lastM(c).m,L=layout(draft(P.g,m,{len:P.len,sleeve:P.sleeve}),P.fw,S.seam);
+  const d=new Date();d.setDate(d.getDate()+7);
+  openSheet(`<h1 style="font-size:22px">Фармоиши нав</h1><p class="muted">${esc(c.name)} · ${GARM[P.g].e} ${GARM[P.g].n}</p>
+  <label class="f">Матоъ</label><input type="text" id="of" value="${P.fw===50?'атлас':'матоъ'}, ${(L.need/100).toFixed(2)} м">
+  <label class="f">Нарх, сомонӣ</label><input type="number" id="op" placeholder="масалан 150">
+  <label class="f">Санаи супоридан</label><input type="date" id="od" value="${d.toISOString().slice(0,10)}">
+  <button class="btn" style="margin-top:8px" onclick="addOrder()">Сохтан</button>`);
+}
+function addOrder(){S.orders.unshift({id:uid(),cid:P.cid,g:P.g,fabric:document.getElementById('of').value,price:+document.getElementById('op').value||0,due:document.getElementById('od').value,st:0,ts:Date.now()});save();closeSheet();toast('Фармоиш сохта шуд ✓');tab='orders';view=null;render()}
+function orderCard(o){const c=C(o.cid);if(!c)return'';const g=GARM[o.g];const late=o.due&&o.st<4&&new Date(o.due)<new Date(new Date().toDateString());
+  return `<div class="ord" style="border-left-color:${o.st>=3?'var(--teal)':late?'var(--red)':'var(--saffron)'}"><div class="row between"><div class="row">${ava(c,40)}<div><h3>${g.e} ${g.n}</h3><p class="muted">${esc(c.name)}</p></div></div><div style="text-align:right"><b>${o.price?o.price+' с.':''}</b><p class="muted" style="font-size:12px">${o.due?(late?'⏰ ':'📅 ')+new Date(o.due).toLocaleDateString('ru-RU'):''}</p></div></div>
+  ${o.fabric?`<p class="muted" style="margin-top:6px">🧵 ${esc(o.fabric)}</p>`:''}
+  <div class="pipe">${STAGES.map((s,i)=>`<button class="${i===o.st?'on':i<o.st?'done':''}" onclick="setSt('${o.id}',${i})">${s}</button>`).join('')}</div></div>`}
+function setSt(id,i){const o=S.orders.find(x=>x.id===id);o.st=i;save();render();if(i===3)toast('Тайёр! Ба мизоҷ хабар диҳед 📞')}
+function ordersView(){const a=S.orders.filter(o=>o.st<4),d=S.orders.filter(o=>o.st>=4);
+  return `<h1>Фармоишҳо</h1>${a.length?a.map(orderCard).join(''):'<p class="muted" style="margin-top:12px">Фармоиши фаъол нест. Фармоишро аз саҳифаи қолиб созед.</p>'}${d.length?`<h2>Супорида шуд</h2>${d.map(orderCard).join('')}`:''}`}
+
+/* ===================== ЁРДАМЧИИ ЗС ===================== */
+const QUICK=['Атласро чӣ тавр бурам, ки нақшаш рост ояд?','Барои курта чӣ қадар озодӣ (прибавка) лозим?','Матоъ кашол мехӯрад — чӣ кор кунам?','Гиребони курта чӣ тавр дӯхта мешавад?'];
+function aiView(){
+  return `<h1>Ёрдамчии ЗС ✨</h1><p class="muted" style="margin:4px 0 10px">Ҳар саволи дӯзандагӣ: буриш, матоъ, андоза, нарх.</p>
+  ${!AI?`<div class="warn">ЗС ҳоло дастрас нест. Ёрдамчӣ бо пайвастшавӣ ба интернет ва иҷозат кор мекунад.</div>`:''}
+  <div class="chat">${chat.length?chat.map(m=>`<div class="msg ${m.role==='user'?'me':'ai'}">${esc(m.content)}</div>`).join(''):`<div class="msg ai">Салом! Ман ёрдамчии дӯзанда ҳастам. Саволатонро нависед ё яке аз инҳоро интихоб кунед 👇</div><div class="chips">${QUICK.map(q=>`<button onclick="askAI(this.textContent)">${q}</button>`).join('')}</div>`}<div id="chatend"></div></div>`;
+}
+function composer(){return `<div class="composer"><input type="text" id="cq" placeholder="Саволи худро нависед…" onkeydown="if(event.key==='Enter')askAI(this.value)"><button onclick="askAI(document.getElementById('cq').value)" aria-label="Фиристодан">➤</button></div>`}
+let chatBusy=false;
+async function askAI(q){
+  q=(q||'').trim();if(!q||chatBusy)return;
+  if(!AI){toast('ЗС дастрас нест');return}
+  chat.push({role:'user',content:q});chat.push({role:'assistant',content:'…'});chatBusy=true;render();
+  const sys='Ту ёрдамчии ботаҷрибаи дӯзанда (дарзӣ) дар Тоҷикистон ҳастӣ. Ба забони тоҷикӣ (кириллӣ), кӯтоҳ ва амалӣ ҷавоб деҳ, 3–8 ҷумла ё рӯйхати кӯтоҳ. Агар рақам лозим бошад — бо сантиметр. Агар намедонӣ, ростқавлона бигӯ.';
+  const conv=chat.slice(0,-1).map((m,i)=>({role:m.role,content:i===0?sys+'\n\nСавол: '+m.content:m.content}));
+  try{await AI(conv,{cache:false,modelTier:'default',onText:({text})=>{chat[chat.length-1].content=text;const els=document.querySelectorAll('.msg.ai');if(els.length)els[els.length-1].textContent=text}})}
+  catch(e){chat[chat.length-1].content=e&&e.code==='rate_limited'?'ЗС ҳоло банд аст. Каме баъд боз пурсед.':'Бубахшед, ҷавоб гирифта нашуд.'}
+  chatBusy=false;render();
+}
+
+/* ===================== START ===================== */
+try{if('serviceWorker' in navigator&&location.protocol==='https:'&&!/claude|usercontent/.test(location.host))navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}
+render();
+</script>
+</body>
+</html>
