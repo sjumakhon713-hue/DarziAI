@@ -47,6 +47,23 @@
   nav{position:fixed;bottom:0;width:100%;max-width:440px;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:flex-end;padding:6px 6px 14px;z-index:5}
   nav button{background:none;border:none;color:#A39689;font:600 11px Inter,sans-serif;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 6px;min-width:60px}
   nav button.on{color:var(--plum)}
+  nav button{min-width:50px;padding:4px 2px;font-size:10.5px}
+  .chips button{white-space:nowrap;flex:none}
+  .cat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+  .mc{position:relative;border-radius:18px;overflow:hidden;background:#EFE7DC;aspect-ratio:3/4.3;cursor:pointer;box-shadow:0 2px 10px rgba(43,36,32,.08)}
+  .mc img{width:100%;height:100%;object-fit:cover;display:block}
+  .mc .mi{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 9px;background:linear-gradient(transparent,rgba(30,20,16,.78));color:#fff;display:flex;flex-direction:column}
+  .mc .mi b{font-size:15px}.mc .mi span{font-size:11.5px;opacity:.85}
+  .mc .del{position:absolute;right:6px;top:6px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:18px;cursor:pointer}
+  .strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  .strip img{width:92px;height:128px;object-fit:cover;border-radius:14px;flex:none;cursor:pointer}
+  .tryon{border-radius:20px;overflow:hidden;background:#EFE7DC;text-align:center;margin-top:8px}
+  .tryon img{width:100%;display:block}
+  img.mini{width:44px;height:56px;object-fit:cover;border-radius:10px;border:2px solid var(--card);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+  .tl{margin:8px 0 0 18px}.tl li{margin:4px 0}
+  textarea{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:500 14px Inter,sans-serif;background:var(--card);color:var(--ink);resize:vertical}
+  select{width:100%;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:600 14px Inter,sans-serif;background:var(--card);color:var(--ink)}
   nav svg{width:23px;height:23px}
   nav .fab{width:60px;height:60px;border-radius:20px;background:linear-gradient(135deg,var(--plum),var(--plum2));color:#fff;display:flex;align-items:center;justify-content:center;margin-top:-26px;box-shadow:0 10px 24px rgba(110,31,69,.4);font-size:28px}
   .back{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:19px;cursor:pointer;color:var(--ink)}
@@ -128,12 +145,13 @@
 const ML={ // андозаҳо
   height:'Қад',neck:'Гардан (давра)',shoulder:'Бари китф',chest:'Сина (давра)',waist:'Миён (давра)',hips:'Сурин (давра)',
   arm:'Дарозии остин',bicep:'Бозу (давра)',wrist:'Банди даст',back:'Дарозии пушт то миён',front:'Дарозии пеш то миён',
-  inseam:'Шим — дарозии дарунӣ',outseam:'Шим — дарозии берунӣ',thigh:'Рон (давра)',pocha:'Почаи шим (давра)'};
+  belly:'Шикам (давра)',inseam:'Шим — дарозии дарунӣ',outseam:'Шим — дарозии берунӣ',thigh:'Рон (давра)',pocha:'Почаи шим (давра)'};
 const MKEYS=Object.keys(ML);
 const GARM={
   skirt:{n:'Доман',e:'👗',d:'доман тӯғрӣ бо камарбанд',need:['waist','hips']},
   pants:{n:'Шим',e:'👖',d:'шими классикӣ',need:['waist','hips','inseam','outseam','thigh','pocha']},
   kurta:{n:'Куртаи занона',e:'🥻',d:'куртаи миллӣ, тӯғрӣ, бо остин',need:['neck','shoulder','chest','arm','bicep','wrist','back']},
+  dress:{n:'Либос аз рӯи модел',e:'👘',d:'либоси дароз аз каталог',need:['neck','shoulder','chest','arm','bicep','wrist','back','hips']},
   shirt:{n:'Куртаи мардона',e:'👔',d:'курта бо гиребон ва сардаст',need:['neck','shoulder','chest','arm','bicep','wrist','back']}
 };
 const FABRICS=[{w:50,n:'Атлас / адрас (50 см)'},{w:90,n:'90 см'},{w:110,n:'110 см'},{w:150,n:'150 см'}];
@@ -159,9 +177,57 @@ function ava(c,s){const col=COLORS[(c.name.charCodeAt(0)||0)%COLORS.length];cons
 function fmtDate(t){const d=new Date(t);return d.toLocaleDateString('ru-RU')}
 
 /* ===================== ЗС (Claude) ===================== */
-(async()=>{try{if(window.claude&&claude.use){const s=await claude.use('sample');if(s){AI=s;try{const l=await s.limits();AIimg=!!(l&&l.images)}catch(e){AIimg=false}render()}
-  const d=await claude.use('downloads');if(d)DL=d}}catch(e){}})();
+/* ЗС: дар Claude — Claude; дар APK / сайт — сервери худ (Cloudflare + Gemini) */
+let AIKIND=null;
+function remoteAI(url){
+  const toB64=b=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=rej;r.readAsDataURL(b)});
+  async function call(input,opts,mode){
+    opts=opts||{};const images=opts.images?await Promise.all(opts.images.map(toB64)):[];
+    const body={mode,images};if(typeof input==='string')body.prompt=input;else body.messages=input;
+    const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),90000);
+    let r;try{r=await fetch(url.replace(/\/$/,'')+'/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctl.signal})}
+    catch(e){throw {code:'network',message:'Пайваст нашуд'}}finally{clearTimeout(t)}
+    if(r.status===429)throw {code:'rate_limited'};
+    const j=await r.json().catch(()=>({}));if(!r.ok||j.error)throw {code:'server',message:j.error||('HTTP '+r.status)};
+    if(opts.onText)opts.onText({text:j.text,delta:j.text});return {text:j.text||''};
+  }
+  const f=(input,opts)=>call(input,opts,'text');
+  f.json=async(input,opts)=>{const o=await call(input,opts,'json');const t=o.text;return JSON.parse(t.slice(t.indexOf('{'),t.lastIndexOf('}')+1))};
+  f.image=async(prompt,opts)=>{const images=await Promise.all((opts.images||[]).map(toB64));
+    const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),120000);let r;
+    try{r=await fetch(url.replace(/\/$/,'')+'/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'image',prompt,images,labels:opts.labels||[],final:opts.final||'',aspect:opts.aspect||''}),signal:ctl.signal})}
+    catch(e){throw {code:'network'}}finally{clearTimeout(t)}
+    const j=await r.json().catch(()=>({}));
+    if(r.status===429)throw {code:j.error==='image_quota'?'image_quota':'rate_limited'};
+    if(!r.ok||!j.image)throw {code:'server',message:j.error||('HTTP '+r.status)};return {image:j.image,text:j.text||''}};
+  f.limits=async()=>({images:true});
+  return f;
+}
+function useRemote(){if(S.aiUrl){AI=remoteAI(S.aiUrl);AIimg=true;AIKIND='server'}else if(AIKIND==='server'){AI=null;AIimg=false;AIKIND=null}}
+(async()=>{await new Promise(r=>setTimeout(r,0));let got=false;try{if(window.claude&&claude.use){const s=await claude.use('sample');if(s){AI=s;AIKIND='claude';got=true;try{const l=await s.limits();AIimg=!!(l&&l.images)}catch(e){AIimg=false}}
+  const d=await claude.use('downloads');if(d)DL=d}}catch(e){}
+  if(!got)useRemote();render()})();
 function aiBadge(){return AI?(AIimg?'🟢 ЗС омода':'🟡 ЗС (бе акс)'):'⚪ ЗС офлайн'}
+function aiSettings(){
+  openSheet(`<h1 style="font-size:22px">⚙️ Танзимоти ЗС</h1>
+  <p class="muted" style="margin:6px 0 12px">${AIKIND==='claude'?'Ҳоло ЗС-и Claude истифода мешавад.':'Барои ЗС дар APK суроғаи сервери худро гузоред (Cloudflare Worker).'}</p>
+  <label class="f">Суроғаи сервер</label><input type="text" id="aiu" value="${esc(S.aiUrl||'')}" placeholder="https://darzi-ai.….workers.dev">
+  <div class="row"><button class="btn" onclick="saveAiUrl()">Нигоҳ доштан ва санҷидан</button></div>
+  ${S.aiUrl?`<button class="btn ghost" style="margin-top:8px" onclick="S.aiUrl='';save();useRemote();closeSheet();render()">Хомӯш кардан</button>`:''}
+  <h2 style="margin-top:18px">📚 Маълумот барои ЗС</h2>
+  <p class="muted" style="font-size:12.5px;margin-bottom:6px">Ҳар чизе ки ЗС бояд донад: номи устохона, суроға, нархҳо, мӯҳлатҳо, қоидаҳо. ЗС дар ҳар ҷавоб ба ин такя мекунад.</p>
+  <textarea id="aii" rows="7" placeholder="Масалан:&#10;Устохонаи «Дарзӣ», Душанбе, кӯчаи Рӯдакӣ 10&#10;Дӯхтани либоси дароз — 250–400 с.&#10;Курта — 150 с., шим — 120 с.&#10;Мӯҳлат: 5–7 рӯз, фаврӣ +50%&#10;Пешпардохт 50%">${esc(S.aiInfo||'')}</textarea>
+  <button class="btn light" style="margin-top:8px" onclick="S.aiInfo=document.getElementById('aii').value;save();toast('Маълумот нигоҳ дошта шуд ✓')">💾 Нигоҳ доштани маълумот</button>
+  <p class="muted" style="margin-top:12px;font-size:12.5px">Аксҳо танҳо вақте ба сервер мераванд, ки шумо «Таҳлил бо ЗС»-ро пахш мекунед.</p>`);
+}
+async function saveAiUrl(){
+  const u=document.getElementById('aiu').value.trim();if(u&&!/^https:\/\//.test(u)){toast('Суроға бояд бо https:// сар шавад');return}
+  S.aiUrl=u;save();if(AIKIND!=='claude')useRemote();
+  if(!u){closeSheet();render();return}
+  toast('Санҷиш…');
+  try{const r=await remoteAI(u)('Танҳо калимаи «тайёр»-ро нависед.');closeSheet();render();toast('✅ ЗС пайваст шуд: '+(r.text||'').slice(0,30))}
+  catch(e){toast('❌ Сервер ҷавоб надод: '+(e.message||e.code||''))}
+}
 
 /* ===================== АКСҲО ===================== */
 function readImg(file,max){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({url:c.toDataURL('image/jpeg',.85),w:c.width,h:c.height})};im.onerror=rej;im.src=e.target.result};r.onerror=rej;r.readAsDataURL(file)})}
@@ -313,6 +379,7 @@ const ICONS={
  home:'<path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
  clients:'<circle cx="9" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.4 3.5 5.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
  orders:'<path d="M6 3h12l1 18H5zM9 7a3 3 0 0 0 6 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>',
+ catalog:'<path d="M9 3h6l-1 3 4 4-2 2v9H8v-9l-2-2 4-4z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>',
  ai:'<path d="M12 3l1.8 4.6L18.5 9l-4.7 1.6L12 15l-1.8-4.4L5.5 9l4.7-1.4z M18 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'
 };
 function render(){
@@ -320,9 +387,10 @@ function render(){
   if(view==='measure'){a.innerHTML=measureView();bindMark();return}
   if(view==='client'){a.innerHTML=clientView();return}
   if(view==='pattern'){a.innerHTML=patternView();return}
-  a.innerHTML=`<header class="top"><div class="brand"><div class="logo"><span class="mk">✂️</span>Дарзӣ <small>AI</small></div><span class="aistat">${aiBadge()}</span></div><div class="tape"></div></header>
-  <main style="${tab==='ai'?'padding-bottom:170px':''}">${({home,clients:clientsView,orders:ordersView,ai:aiView})[tab]()}</main>
-  <nav>${[['home','Асосӣ'],['clients','Мизоҷон'],['fab',''],['orders','Фармоишҳо'],['ai','Ёрдамчӣ']].map(([k,l])=>k==='fab'?`<button onclick="startMeasure()" aria-label="Ченкунии нав"><span class="fab">＋</span></button>`:`<button class="${tab===k?'on':''}" onclick="tab='${k}';view=null;render();scrollTo(0,0)"><svg viewBox="0 0 24 24">${ICONS[k]}</svg>${l}</button>`).join('')}</nav>
+  if(view==='try'){a.innerHTML=tryView();return}
+  a.innerHTML=`<header class="top"><div class="brand"><div class="logo"><span class="mk">✂️</span>Дарзӣ <small>AI</small></div><span class="aistat" onclick="aiSettings()" style="cursor:pointer">${aiBadge()} ⚙️</span></div><div class="tape"></div></header>
+  <main style="${tab==='ai'?'padding-bottom:170px':''}">${({home,catalog:catalogView,clients:clientsView,orders:ordersView,ai:aiView})[tab]()}</main>
+  <nav>${[['home','Асосӣ'],['catalog','Моделҳо'],['clients','Мизоҷон'],['fab',''],['orders','Фармоиш'],['ai','ЗС']].map(([k,l])=>k==='fab'?`<button onclick="startMeasure()" aria-label="Ченкунии нав"><span class="fab">＋</span></button>`:`<button class="${tab===k?'on':''}" onclick="tab='${k}';view=null;render();scrollTo(0,0)"><svg viewBox="0 0 24 24">${ICONS[k]}</svg>${l}</button>`).join('')}</nav>
   ${tab==='ai'?composer():''}`;
   if(tab==='ai'){const el=document.getElementById('chatend');if(el)el.scrollIntoView()}
 }
@@ -330,7 +398,9 @@ function home(){
   const act=S.orders.filter(o=>o.st<4);const soon=act.slice().sort((a,b)=>(a.due||'9').localeCompare(b.due||'9')).slice(0,3);
   return `<div class="hero"><h1>Салом, устод! ✂️</h1><p class="muted" style="margin-top:4px">Акс гиред — зеҳни сунъӣ андозаҳоро мегирад ва қолибро тайёр мекунад.</p>
    <div class="stats"><div class="stat"><b>${S.clients.length}</b><span>мизоҷ</span></div><div class="stat"><b>${act.length}</b><span>фармоиш</span></div><div class="stat"><b>${S.clients.reduce((a,c)=>a+(c.meas||[]).length,0)}</b><span>ченкунӣ</span></div></div>
-   <button class="btn" style="margin-top:14px" onclick="startMeasure()">📸 Ченкунии нав бо акс</button></div>
+   <button class="btn" style="margin-top:14px" onclick="startMeasure()">📸 Ченкунии нав бо акс</button>
+   <button class="btn saff" style="margin-top:8px" onclick="tab='catalog';render();scrollTo(0,0)">👗 Модел интихоб ва бар худ санҷидан</button></div>
+  <h2>Моделҳои нав</h2><div class="strip">${allModels().slice(0,8).map(x=>`<img src="${x.img}" alt="${esc(x.n)}" onclick="openModel('${x.id}')">`).join('')}</div>
   <h2>Чӣ кор карда метавонад</h2>
   <div class="feat">
    <div class="fe" onclick="startMeasure()"><div class="ic" style="background:var(--plumL)">📐</div><h3>Андоза аз акс</h3><p class="muted">2 акс + қад → 15 андоза</p></div>
@@ -351,8 +421,8 @@ function clientView(){
   const c=C(cur),m=lastM(c);
   return `<main><div class="row between"><button class="back" onclick="view=null;render()">←</button><button class="btn sm ghost" onclick="delClient('${c.id}')">🗑️</button></div>
   <div class="row" style="margin-top:14px;gap:14px">${ava(c,64)}<div><h1>${esc(c.name)}</h1><p class="muted">${c.gender==='f'?'зан':'мард'}${c.phone?' · '+esc(c.phone):''}</p></div></div>
-  ${m?`<h2>Андозаҳо <span class="tag ${m.src==='ai'?'t-plum':m.src==='points'?'t-saff':''}">${m.src==='ai'?'✨ ЗС':m.src==='points'?'📍 аз нуқтаҳо':'✍️ дастӣ'}</span> <span class="muted" style="font-weight:500">${fmtDate(m.date)}</span></h2>
-   <table class="m">${MKEYS.map(k=>`<tr><td>${ML[k]}</td><td style="text-align:right"><b>${r1(m.m[k])}</b> <span class="muted">см</span></td></tr>`).join('')}</table>
+  ${m?`<h2>Андозаҳо <span class="tag ${m.src==='ai'?'t-plum':m.src==='points'?'t-saff':''}">${m.src==='ai'?'✨ ЗС':m.src==='points'?'📍 аз нуқтаҳо':m.src==='client'?'👗 аз мизоҷ':'✍️ дастӣ'}</span> <span class="muted" style="font-weight:500">${fmtDate(m.date)}</span></h2>
+   <table class="m">${MKEYS.filter(k=>m.m[k]>0).map(k=>`<tr><td>${ML[k]}</td><td style="text-align:right"><b>${r1(m.m[k])}</b> <span class="muted">см</span></td></tr>`).join('')}</table>
    <h2>Қолиб тайёр кунед</h2><div class="garm">${Object.entries(GARM).map(([k,g])=>`<div class="gm" onclick="openPattern('${c.id}','${k}')"><div class="e">${g.e}</div><h3>${g.n}</h3><p class="muted" style="font-size:12px">${g.d}</p></div>`).join('')}</div>
    <button class="btn light" style="margin-top:12px" onclick="startMeasure('${c.id}')">📸 Андозаи нав</button>`
   :`<div class="note" style="margin-top:14px">Андоза нест.</div><button class="btn" style="margin-top:12px" onclick="startMeasure('${c.id}')">📸 Андоза гирифтан</button>`}
@@ -390,7 +460,7 @@ function measureView(){
     const canAI=AI&&AIimg;
     h+=`<h1>Кӣ чен кунад?</h1><p class="muted" style="margin:4px 0 14px">Ду роҳ ҳаст — ҳардуро метавонед санҷед.</p>
     <div class="card" style="border:2px solid ${canAI?'var(--plum)':'var(--line)'}"><div class="row"><div class="ava" style="background:var(--plum)">✨</div><div style="flex:1"><h3>Зеҳни сунъӣ</h3><p class="muted">ЗС аксҳоро таҳлил карда, ҳамаи 15 андозаро худаш муайян мекунад.</p></div></div>
-     ${canAI?`<button class="btn" style="margin-top:12px" onclick="runAI()">✨ Таҳлил бо ЗС</button>`:`<p class="warn" style="margin-top:10px">ЗС ҳоло дастрас нест (офлайн ё бе пайвастшавӣ). Роҳи дуюмро истифода баред.</p>`}</div>
+     ${canAI?`<button class="btn" style="margin-top:12px" onclick="runAI()">✨ Таҳлил бо ЗС</button>`:`<p class="warn" style="margin-top:10px">ЗС ҳоло дастрас нест. Дар ⚙️ (боло) сервери ЗС-ро пайваст кунед ё роҳи дуюмро истифода баред.</p>`}</div>
     <div class="card"><div class="row"><div class="ava" style="background:var(--saffron);color:var(--ink)">📍</div><div style="flex:1"><h3>Нуқтагузорӣ (офлайн)</h3><p class="muted">Шумо ба нуқтаҳои бадан ламс мекунед — барнома ҳамаашро худаш ҳисоб мекунад. Бе интернет кор мекунад.</p></div></div>
      <button class="btn ${canAI?'ghost':'saff'}" style="margin-top:12px" onclick="M.step=3;M.which='front';M.idx=Object.keys(M.fp).length;render()">📍 Нуқтагузорӣ</button></div>`;
   }
@@ -411,7 +481,7 @@ function measureView(){
     h+=`<h1>Андозаҳо тайёр</h1><p class="muted" style="margin:4px 0 10px">${M.src==='ai'?'✨ ЗС муайян кард':'📍 Аз нуқтаҳо ҳисоб шуд'} · ҳар рақамро ислоҳ кардан мумкин аст</p>
     ${M.quality==='poor'||M.issues.length?`<div class="warn" style="margin-bottom:10px">⚠️ ${M.issues.map(esc).join('<br>')||'Сифати акс паст аст.'}</div>`:''}
     ${M.note?`<div class="note" style="margin-bottom:10px">${esc(M.note)}</div>`:''}
-    <table class="m">${MKEYS.map(k=>`<tr><td>${ML[k]}<br><span class="src">${({photo:'аз акс',photo1:'аз 1 акс + таносуб',ratio:'аз таносуб',input:'воридшуда',ai:'ЗС'})[r.src[k]]||''}</span></td><td style="text-align:right"><input type="number" inputmode="decimal" value="${r.m[k]}" oninput="M.res.m['${k}']=+this.value"> <span class="muted">см</span></td></tr>`).join('')}</table>
+    <table class="m">${MKEYS.filter(k=>k!=='belly'||r.m[k]>0).map(k=>`<tr><td>${ML[k]}<br><span class="src">${({photo:'аз акс',photo1:'аз 1 акс + таносуб',ratio:'аз таносуб',input:'воридшуда',ai:'ЗС'})[r.src[k]]||''}</span></td><td style="text-align:right"><input type="number" inputmode="decimal" value="${r.m[k]}" oninput="M.res.m['${k}']=+this.value"> <span class="muted">см</span></td></tr>`).join('')}</table>
     <div class="tips">📏 Андозаҳо <b>тахминӣ</b> мебошанд (хатои маъмулӣ ±2–4 см). Пеш аз буридан 2–3 андозаи асосиро бо сантиметр санҷед: сина, миён, сурин.</div>
     <button class="btn" style="margin-top:14px" onclick="saveMeasure()">💾 Нигоҳ доштан</button>`;
   }
@@ -460,7 +530,7 @@ async function runAI(){
     M.step=2;render();
     if(e&&e.code==='not_granted'){toast('Иҷозат барои ЗС дода нашуд');AI=null;render()}
     else if(e&&e.code==='rate_limited')toast('ЗС банд аст — каме баъд боз кӯшиш кунед');
-    else toast('ЗС андозаро муайян карда натавонист — нуқтагузориро истифода баред');
+    else toast(e&&e.code==='network'?'Интернет нест — нуқтагузориро истифода баред':'ЗС андозаро муайян карда натавонист — нуқтагузориро истифода баред');
   }
 }
 async function saveMeasure(){
@@ -472,16 +542,20 @@ async function saveMeasure(){
 }
 
 /* ===================== ҚОЛИБ ===================== */
-function openPattern(cid,g){const c=C(cid),m=lastM(c).m;P={cid,g,fw:g==='kurta'?50:150,len:g==='skirt'?60:g==='pants'?r1(m.outseam):r1(g==='kurta'?m.height*0.62:m.height*0.45),sleeve:r1(m.arm),plan:null,planLoading:false};view='pattern';render();scrollTo(0,0)}
+function pDraft(m){return P.g==='dress'?draftModel(MD(P.model)||MODELS[3],m,{len:P.len,sleeve:P.sleeve,cut:P.cut,sl:P.sl}):pDraft(m)}
+function openPattern(cid,g){const c=C(cid),m=lastM(c).m;if(g==='dress'){P={cid,g,model:'m04',fw:150,len:dressLen(m.height,'maxi'),sleeve:r1(m.arm),plan:null,planLoading:false};view='pattern';render();scrollTo(0,0);return}P={cid,g,fw:g==='kurta'?50:150,len:g==='skirt'?60:g==='pants'?r1(m.outseam):r1(g==='kurta'?m.height*0.62:m.height*0.45),sleeve:r1(m.arm),plan:null,planLoading:false};view='pattern';render();scrollTo(0,0)}
 function patternView(){
   const c=C(P.cid),m=lastM(c).m,g=GARM[P.g];
   const missing=g.need.filter(k=>!(m[k]>0));
   let h=`<main><div class="row between"><button class="back" onclick="view='client';render()">←</button><span class="muted" style="font-weight:700">${esc(c.name)}</span><span style="width:40px"></span></div>
   <h1 style="margin-top:12px">${g.e} ${g.n}</h1><p class="muted">${g.d}</p>`;
+  if(P.g==='dress'){const md=MD(P.model)||MODELS[3];h+=`<div class="row" style="gap:10px;margin-top:10px"><img src="${md.img}" alt="" style="width:64px;height:84px;object-fit:cover;border-radius:12px"><div style="flex:1"><label class="f" style="margin-top:0">Модел</label><select onchange="P.model=this.value;P.cut=null;P.sl=null;P.plan=null;render()">${allModels().map(x=>`<option value="${x.id}" ${x.id===md.id?'selected':''}>${esc(x.n)} — ${CUTS[x.cut]}</option>`).join('')}</select></div></div>
+  ${md.cut!=='set'?`<label class="f">Бурриш</label><div class="seg">${['straight','aline','wide'].map(k=>`<button class="${(P.cut||md.cut)===k?'on':''}" onclick="P.cut='${k}';P.plan=null;render()">${CUTS[k]}</button>`).join('')}</div>
+  <label class="f">Остин</label><div class="seg">${Object.keys(SLS).map(k=>`<button class="${(P.sl||md.sl)===k?'on':''}" onclick="P.sl='${k}';P.plan=null;render()">${SLS[k].replace('остини ','')}</button>`).join('')}</div>`:''}`}
   if(missing.length){return h+`<div class="warn" style="margin-top:12px">Андозаҳо намерасанд: ${missing.map(k=>ML[k]).join(', ')}</div></main>`}
-  const pcs=draft(P.g,m,{len:P.len,sleeve:P.sleeve});
+  const pcs=pDraft(m);
   const L=layout(pcs,P.fw,S.seam);
-  h+=`<div class="row" style="margin-top:12px;gap:8px"><div style="flex:1"><label class="f" style="margin-top:0">Дарозии либос, см</label><input type="number" value="${P.len}" onchange="P.len=+this.value;P.plan=null;render()"></div>${P.g==='kurta'||P.g==='shirt'?`<div style="flex:1"><label class="f" style="margin-top:0">Дарозии остин</label><input type="number" value="${P.sleeve}" onchange="P.sleeve=+this.value;P.plan=null;render()"></div>`:''}</div>
+  h+=`<div class="row" style="margin-top:12px;gap:8px"><div style="flex:1"><label class="f" style="margin-top:0">Дарозии либос, см</label><input type="number" value="${P.len}" onchange="P.len=+this.value;P.plan=null;render()"></div>${P.g==='kurta'||P.g==='shirt'||P.g==='dress'?`<div style="flex:1"><label class="f" style="margin-top:0">Дарозии остин</label><input type="number" value="${P.sleeve}" onchange="P.sleeve=+this.value;P.plan=null;render()"></div>`:''}</div>
   <label class="f">Бари матоъ</label><div class="seg">${FABRICS.map(f=>`<button class="${P.fw===f.w?'on':''}" onclick="P.fw=${f.w};P.plan=null;render()">${f.w===50?'Атлас 50':f.w}</button>`).join('')}</div>
   <div class="card" style="margin-top:14px;text-align:center"><p class="muted">Матоъ лозим (бо захира)</p><div class="big">${(L.need/100).toFixed(2)} м</div><p class="muted">бари ${P.fw} см · ${L.placed.length} порча · кромка ${S.seam} см</p>${L.split?`<p class="tag t-saff" style="margin-top:8px">Матоъ танг аст — баъзе порчаҳо аз 2+ қисм дӯхта мешаванд</p>`:''}</div>
   <h2>Порчаҳо</h2><div class="card">${pcs.map(p=>{const b=bbox(p.pts);return `<div class="piece"><span><b>${p.n}</b> ×${p.cnt}<br><span class="muted" style="font-size:12px">${p.note}</span></span><span style="text-align:right;font-weight:700">${r1(b.x1-b.x0)} × ${r1(b.y1-b.y0)}<br><span class="muted" style="font-size:12px">см</span></span></div>`}).join('')}</div>
@@ -506,11 +580,11 @@ function localPlan(pcs,L){
     `Пеш аз дӯхтан ${g}-ро бо сӯзан ҷамъ карда ба мизоҷ пӯшонед ва андозаро санҷед.`];
 }
 async function makePlan(){
-  const c=C(P.cid),m=lastM(c).m,pcs=draft(P.g,m,{len:P.len,sleeve:P.sleeve}),L=layout(pcs,P.fw,S.seam);
+  const c=C(P.cid),m=lastM(c).m,pcs=pDraft(m),L=layout(pcs,P.fw,S.seam);
   if(!AI){P.plan=localPlan(pcs,L);render();return}
   P.planLoading=true;render();
-  const prompt=`Ту устои дӯзанда ҳастӣ. Барои дӯзандаи ҷавон нақшаи буриши кӯтоҳ ва амалӣ навис, ба забони тоҷикӣ.
-Либос: ${GARM[P.g].n} (${GARM[P.g].d}). Мизоҷ: ${c.gender==='f'?'зан':'мард'}.
+  const prompt=`${infoCtx()}Ту устои дӯзанда ҳастӣ. Барои дӯзандаи ҷавон нақшаи буриши кӯтоҳ ва амалӣ навис, ба забони тоҷикӣ.
+Либос: ${P.g==='dress'?(()=>{const md=MD(P.model)||MODELS[3];return `модели «${md.n}» — ${md.d}; ${CUTS[P.cut||md.cut]}, ${SLS[P.sl||md.sl]}`})():GARM[P.g].n+' ('+GARM[P.g].d+')'}. Мизоҷ: ${c.gender==='f'?'зан':'мард'}.
 Андозаҳо (см): ${MKEYS.map(k=>ML[k]+' '+r1(m[k])).join('; ')}.
 Порчаҳо: ${pcs.map(p=>{const b=bbox(p.pts);return `${p.n} ×${p.cnt} (${r1(b.x1-b.x0)}×${r1(b.y1-b.y0)} см, ${p.note})`}).join('; ')}.
 Матоъ: бари ${P.fw} см, лозим ${(L.need/100).toFixed(2)} м. Кромка ${S.seam} см.
@@ -521,7 +595,7 @@ async function makePlan(){
   P.planLoading=false;render();
 }
 async function saveSVG(){
-  const c=C(P.cid),m=lastM(c).m,pcs=draft(P.g,m,{len:P.len,sleeve:P.sleeve}),L=layout(pcs,P.fw,S.seam);
+  const c=C(P.cid),m=lastM(c).m,pcs=pDraft(m),L=layout(pcs,P.fw,S.seam);
   // ҳамаи порчаҳо дар андозаи воқеӣ (1 воҳид = 1 см) барои чоп
   let x=0,parts='',maxH=0;pcs.forEach(p=>{const b=bbox(p.pts);const w=b.x1-b.x0+12,h=b.y1-b.y0+18;parts+=`<g transform="translate(${r1(x)} 0)">${pieceSVG(p,S.seam).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'').replace('<rect width="100%" height="100%" fill="#FFFDF9"/>','')}</g>`;x+=w+4;maxH=Math.max(maxH,h)});
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${r1(x)}cm" height="${r1(maxH)}cm" viewBox="0 0 ${r1(x)} ${r1(maxH)}">${parts}</svg>`;
@@ -534,7 +608,7 @@ async function saveSVG(){
 }
 /* ===================== ФАРМОИШҲО ===================== */
 function newOrder(){
-  const c=C(P.cid),m=lastM(c).m,L=layout(draft(P.g,m,{len:P.len,sleeve:P.sleeve}),P.fw,S.seam);
+  const c=C(P.cid),m=lastM(c).m,L=layout(pDraft(m),P.fw,S.seam);
   const d=new Date();d.setDate(d.getDate()+7);
   openSheet(`<h1 style="font-size:22px">Фармоиши нав</h1><p class="muted">${esc(c.name)} · ${GARM[P.g].e} ${GARM[P.g].n}</p>
   <label class="f">Матоъ</label><input type="text" id="of" value="${P.fw===50?'атлас':'матоъ'}, ${(L.need/100).toFixed(2)} м">
@@ -543,9 +617,10 @@ function newOrder(){
   <button class="btn" style="margin-top:8px" onclick="addOrder()">Сохтан</button>`);
 }
 function addOrder(){S.orders.unshift({id:uid(),cid:P.cid,g:P.g,fabric:document.getElementById('of').value,price:+document.getElementById('op').value||0,due:document.getElementById('od').value,st:0,ts:Date.now()});save();closeSheet();toast('Фармоиш сохта шуд ✓');tab='orders';view=null;render()}
-function orderCard(o){const c=C(o.cid);if(!c)return'';const g=GARM[o.g];const late=o.due&&o.st<4&&new Date(o.due)<new Date(new Date().toDateString());
+function orderCard(o){const c=C(o.cid);if(!c)return'';const g=o.model&&MD(o.model)?{e:'👘',n:MD(o.model).n}:GARM[o.g];const late=o.due&&o.st<4&&new Date(o.due)<new Date(new Date().toDateString());
   return `<div class="ord" style="border-left-color:${o.st>=3?'var(--teal)':late?'var(--red)':'var(--saffron)'}"><div class="row between"><div class="row">${ava(c,40)}<div><h3>${g.e} ${g.n}</h3><p class="muted">${esc(c.name)}</p></div></div><div style="text-align:right"><b>${o.price?o.price+' с.':''}</b><p class="muted" style="font-size:12px">${o.due?(late?'⏰ ':'📅 ')+new Date(o.due).toLocaleDateString('ru-RU'):''}</p></div></div>
   ${o.fabric?`<p class="muted" style="margin-top:6px">🧵 ${esc(o.fabric)}</p>`:''}
+  ${o.model||o.fabImg||o.tryImg?`<div class="row" style="gap:6px;margin-top:8px">${o.model&&MD(o.model)?`<img class="mini" src="${MD(o.model).img}" alt="">`:''}${o.fabImg?`<img class="mini" src="${o.fabImg}" alt="">`:''}${o.tryImg?`<img class="mini" src="${o.tryImg}" alt="" style="cursor:zoom-in" onclick="openSheet('<img src=&quot;'+this.src+'&quot; style=&quot;width:100%;border-radius:14px&quot;>')">`:''}${o.model?`<button class="btn sm light" style="margin-left:auto" onclick="P={cid:'${o.cid}',g:'dress',model:'${o.model}',fw:150,len:${+o.len||0}||dressLen(lastM(C('${o.cid}')).m.height,'maxi'),sleeve:r1(lastM(C('${o.cid}')).m.arm),plan:null};view='pattern';render();scrollTo(0,0)">📐 Қолиб</button>`:''}</div>`:''}
   <div class="pipe">${STAGES.map((s,i)=>`<button class="${i===o.st?'on':i<o.st?'done':''}" onclick="setSt('${o.id}',${i})">${s}</button>`).join('')}</div></div>`}
 function setSt(id,i){const o=S.orders.find(x=>x.id===id);o.st=i;save();render();if(i===3)toast('Тайёр! Ба мизоҷ хабар диҳед 📞')}
 function ordersView(){const a=S.orders.filter(o=>o.st<4),d=S.orders.filter(o=>o.st>=4);
@@ -555,7 +630,7 @@ function ordersView(){const a=S.orders.filter(o=>o.st<4),d=S.orders.filter(o=>o.
 const QUICK=['Атласро чӣ тавр бурам, ки нақшаш рост ояд?','Барои курта чӣ қадар озодӣ (прибавка) лозим?','Матоъ кашол мехӯрад — чӣ кор кунам?','Гиребони курта чӣ тавр дӯхта мешавад?'];
 function aiView(){
   return `<h1>Ёрдамчии ЗС ✨</h1><p class="muted" style="margin:4px 0 10px">Ҳар саволи дӯзандагӣ: буриш, матоъ, андоза, нарх.</p>
-  ${!AI?`<div class="warn">ЗС ҳоло дастрас нест. Ёрдамчӣ бо пайвастшавӣ ба интернет ва иҷозат кор мекунад.</div>`:''}
+  ${!AI?`<div class="warn">ЗС ҳоло дастрас нест. Дар ⚙️ (боло) сервери ЗС-ро пайваст кунед — ва ёрдамчӣ кор мекунад.</div>`:''}
   <div class="chat">${chat.length?chat.map(m=>`<div class="msg ${m.role==='user'?'me':'ai'}">${esc(m.content)}</div>`).join(''):`<div class="msg ai">Салом! Ман ёрдамчии дӯзанда ҳастам. Саволатонро нависед ё яке аз инҳоро интихоб кунед 👇</div><div class="chips">${QUICK.map(q=>`<button onclick="askAI(this.textContent)">${q}</button>`).join('')}</div>`}<div id="chatend"></div></div>`;
 }
 function composer(){return `<div class="composer"><input type="text" id="cq" placeholder="Саволи худро нависед…" onkeydown="if(event.key==='Enter')askAI(this.value)"><button onclick="askAI(document.getElementById('cq').value)" aria-label="Фиристодан">➤</button></div>`}
@@ -564,11 +639,258 @@ async function askAI(q){
   q=(q||'').trim();if(!q||chatBusy)return;
   if(!AI){toast('ЗС дастрас нест');return}
   chat.push({role:'user',content:q});chat.push({role:'assistant',content:'…'});chatBusy=true;render();
-  const sys='Ту ёрдамчии ботаҷрибаи дӯзанда (дарзӣ) дар Тоҷикистон ҳастӣ. Ба забони тоҷикӣ (кириллӣ), кӯтоҳ ва амалӣ ҷавоб деҳ, 3–8 ҷумла ё рӯйхати кӯтоҳ. Агар рақам лозим бошад — бо сантиметр. Агар намедонӣ, ростқавлона бигӯ.';
+  const sys=infoCtx()+'Моделҳои каталоги мо: '+allModels().map(x=>x.n+' ('+(x.d||'')+')').join('; ')+'.\n'+'Ту ёрдамчии ботаҷрибаи дӯзанда (дарзӣ) дар Тоҷикистон ҳастӣ. Ба забони тоҷикӣ (кириллӣ), кӯтоҳ ва амалӣ ҷавоб деҳ, 3–8 ҷумла ё рӯйхати кӯтоҳ. Агар рақам лозим бошад — бо сантиметр. Агар намедонӣ, ростқавлона бигӯ.';
   const conv=chat.slice(0,-1).map((m,i)=>({role:m.role,content:i===0?sys+'\n\nСавол: '+m.content:m.content}));
   try{await AI(conv,{cache:false,modelTier:'default',onText:({text})=>{chat[chat.length-1].content=text;const els=document.querySelectorAll('.msg.ai');if(els.length)els[els.length-1].textContent=text}})}
   catch(e){chat[chat.length-1].content=e&&e.code==='rate_limited'?'ЗС ҳоло банд аст. Каме баъд боз пурсед.':'Бубахшед, ҷавоб гирифта нашуд.'}
   chatBusy=false;render();
+}
+
+/* ===================== КАТАЛОГ ВА «БАР ХУД САНҶИДАН» ===================== */
+// cut: straight | aline | wide | set · len: mini | midi | maxi · sl: long | wide | puff | short
+const MODELS=[
+ {id:'m01',n:'Шабнам',d:'Домани сафеди дароз, болопӯши атласи сиёҳу сафед бо шокилаҳо',cut:'aline',len:'maxi',sl:'long'},
+ {id:'m02',n:'Гулрух',d:'Атласи сурх бо чапони рахдор, домани васеъ',cut:'wide',len:'maxi',sl:'long'},
+ {id:'m03',n:'Бекасаб',d:'Чапони рахдори бекасаб, остини тӯрӣ, думдор',cut:'wide',len:'maxi',sl:'wide'},
+ {id:'m04',n:'Нафиса',d:'Либоси ширранг, камзӯлчаи гулдӯзӣ',cut:'aline',len:'maxi',sl:'long'},
+ {id:'m05',n:'Осмон',d:'Либоси кабуди ҷилодор, остинҳои васеъ',cut:'wide',len:'maxi',sl:'wide'},
+ {id:'m06',n:'Адрас',d:'Адраси сурху сафед, остинҳои сафеди васеъ',cut:'aline',len:'maxi',sl:'wide'},
+ {id:'m07',n:'Малика',d:'Либоси сафед бо гулдӯзии тиллоранг',cut:'aline',len:'maxi',sl:'wide'},
+ {id:'m08',n:'Сӯзанӣ',d:'Либоси сафед бо болопӯши сурхи сӯзанидӯзӣ',cut:'aline',len:'maxi',sl:'long'},
+ {id:'m09',n:'Анор',d:'Либоси кӯтоҳ, нақши икати сурху сафед',cut:'straight',len:'mini',sl:'short'},
+ {id:'m10',n:'Шоҳона',d:'Чапони рахдор бо гулдӯзӣ ва тоқӣ',cut:'aline',len:'maxi',sl:'wide'},
+ {id:'m11',n:'Нилуфар',d:'Икати кабуду сафед, домани васеъ, думдор',cut:'wide',len:'maxi',sl:'long'},
+ {id:'m12',n:'Ёқут',d:'Икати сурх, тӯғрӣ, думи дароз',cut:'aline',len:'maxi',sl:'puff'},
+ {id:'m13',n:'Сабза',d:'Домани сабз, болопӯши икат бо шокила',cut:'aline',len:'maxi',sl:'long'},
+ {id:'m14',n:'Ола',d:'Маҷмӯа: курта ва шими атласи сиёҳу сафед',cut:'set',len:'midi',sl:'wide'},
+ {id:'m15',n:'Баҳор',d:'Куртаи атласи рангин, гулдӯзӣ ва шокилаҳо',cut:'straight',len:'midi',sl:'long'},
+ {id:'m16',n:'Гулнор',d:'Атласи гулобӣ бо рӯймоли тӯрӣ',cut:'wide',len:'maxi',sl:'long'},
+ {id:'m17',n:'Лола',d:'Либоси сурх, остинҳои пуф, гулдӯзӣ дар пеш',cut:'aline',len:'maxi',sl:'puff'},
+ {id:'m18',n:'Тиллоӣ',d:'Домани плиседор, болопӯши гулдӯзӣ',cut:'aline',len:'maxi',sl:'long'},
+ {id:'m19',n:'Зумрад',d:'Сафед бо нақши икат ва сангҳо, остини васеъ',cut:'aline',len:'maxi',sl:'wide'},
+ {id:'m20',n:'Арӯсӣ',d:'Тӯри сафед бо нақши сурх, хеле васеъ',cut:'wide',len:'maxi',sl:'long'},
+ {id:'m21',n:'Бахмал',d:'Бахмали гулобӣ бо гулдӯзии тиллоранг',cut:'straight',len:'midi',sl:'long'},
+ {id:'m22',n:'Шаби кабуд',d:'Бахмали кабуд, гиребони сангдор',cut:'straight',len:'maxi',sl:'long'},
+ {id:'m23',n:'Бунафша',d:'Либоси бунафш, тӯғрӣ, гиребони сангдор',cut:'straight',len:'maxi',sl:'long'}
+].map(x=>({...x,img:'models/'+x.id+'.jpg'}));
+const CUTS={straight:'Тӯғрӣ',aline:'Озод (A)',wide:'Васеъ',set:'Маҷмӯа'};
+const LENS={mini:'то зону',midi:'то соқ',maxi:'то замин'};
+const SLS={long:'остини дароз',wide:'остини васеъ',puff:'остини пуф',short:'остини кӯтоҳ'};
+let catF='all',T=null;
+function allModels(){return [...(S.models||[]),...MODELS]}
+function MD(id){return allModels().find(m=>m.id===id)}
+function infoCtx(){return S.aiInfo&&S.aiInfo.trim()?`Маълумоти устохона (ҳамеша ба инҳо такя кун, нархҳоро аз ин ҷо гир):\n${S.aiInfo.trim().slice(0,3000)}\n\n`:''}
+
+/* --- андозаҳо аз 4 рақами дастӣ --- */
+function fromClient(v){
+  const H=+v.H,ch=+v.chest,wa=+v.waist,be=+v.belly;
+  const hips=+v.hips||r1(Math.max(ch*1.07,be*1.12,wa*1.2));
+  const m={height:H,chest:ch,waist:wa,belly:be,hips,neck:r1(ch*0.37),shoulder:+v.shoulder||r1(ch*0.41),arm:+v.arm||r1(H*0.35),
+    bicep:r1(ch*0.31),wrist:r1(H*0.095),back:r1(H*0.245),front:r1(H*0.27),inseam:r1(H*0.45),outseam:r1(H*0.62)};
+  m.thigh=r1(hips*0.59);m.pocha=r1(m.thigh*0.72);
+  const src={};MKEYS.forEach(k=>src[k]='ratio');['height','chest','waist','belly'].forEach(k=>src[k]='input');
+  ['hips','shoulder','arm'].forEach(k=>{if(+v[k])src[k]='input'});
+  return {m,src};
+}
+function dressLen(H,len){return r0(H*({mini:0.53,midi:0.66,maxi:0.82}[len]||0.82))}
+
+/* --- қолиби либос --- */
+function draftDress(m,opt){
+  const L=+opt.len,cut=opt.cut||'aline',sl=opt.sl||'long',pcs=[];
+  const big=Math.max(m.chest,m.belly||0);
+  const B=big/4+3.5,AD=m.chest/10+10.5,NW=m.neck/6+0.5,NDf=NW+2.5,sh=m.shoulder/2;
+  const hipY=Math.min(L-5,m.back+20),hipW=Math.max(B,m.hips/4+2);
+  const hem=hipW+({straight:2,aline:L*0.16,wide:L*0.32}[cut]||L*0.16);
+  const body=nd=>[[0,nd],[NW*0.5,nd*0.88],[NW*0.85,nd*0.5],[NW,0],[sh,4],[sh-0.7,AD*0.38],[sh-0.9,AD*0.66],[sh+(B-sh)*0.35,AD*0.93],[B,AD],[B,AD+6],[hipW,hipY],[hem,L],[0,L]];
+  pcs.push({n:'Пеш',cnt:1,fold:true,pts:body(NDf),note:`дар қат · гиребон ${r1(NDf)} см · поён ${r1(hem*2)} см`});
+  pcs.push({n:'Пушт',cnt:1,fold:true,pts:body(2),note:`дар қат · зиппер 50 см`});
+  const cap=AD-4.5,sw=m.bicep+6;
+  if(sl==='puff'){const pw=sw*1.5,pl=26;
+    pcs.push({n:'Остини пуф',cnt:2,fold:false,pts:[[0,cap+4],[pw*0.15,cap*0.55],[pw*0.32,cap*0.12],[pw/2,0],[pw*0.68,cap*0.12],[pw*0.85,cap*0.55],[pw,cap+4],[pw*0.92,pl+cap],[pw*0.08,pl+cap]],note:'болояш чин мешавад'});
+    pcs.push({n:'Банди остин',cnt:2,fold:false,pts:[[0,0],[m.bicep+4,0],[m.bicep+4,6],[0,6]],note:'бозу + 4 см'});
+  }else{
+    const al=sl==='short'?24:+opt.sleeve||m.arm,bw=sl==='wide'?sw*1.7:sl==='short'?sw*0.95:m.wrist+12;
+    const d=(sw-bw)/2;
+    pcs.push({n:sl==='wide'?'Остини васеъ':'Остин',cnt:2,fold:false,pts:[[0,cap],[sw*0.12,cap*0.7],[sw*0.25,cap*0.32],[sw*0.38,cap*0.08],[sw/2,0],[sw*0.62,cap*0.08],[sw*0.75,cap*0.32],[sw*0.88,cap*0.7],[sw,cap],[sw-d,al],[d,al]].map(p=>[p[0]+Math.max(0,-d),p[1]]),note:`дарозӣ ${r1(al)} см`});
+  }
+  pcs.push({n:'Рӯяи гиребон',cnt:1,fold:true,pts:[[0,0],[NW+4,0],[NW+4,NDf+4],[0,NDf+4]],note:'дар қат'});
+  return pcs;
+}
+function draftModel(md,m,o){
+  o=o||{};
+  if(md.cut==='set'){const k=draft('kurta',m,{len:o.len||r0(m.height*0.6),sleeve:o.sleeve}),p=draft('pants',m,{len:m.outseam});return [...k,...p.map(x=>({...x,n:x.n}))]}
+  return draftDress(m,{len:o.len||dressLen(m.height,md.len),cut:o.cut||md.cut,sl:o.sl||md.sl,sleeve:o.sleeve});
+}
+
+/* --- каталог --- */
+function catalogView(){
+  const list=allModels().filter(x=>catF==='all'||x.cut===catF);
+  return `<div class="row between"><h1>Моделҳо</h1><label class="btn sm" style="cursor:pointer">＋ Модел<input type="file" accept="image/*" style="display:none" onchange="addModel(this)"></label></div>
+  <p class="muted" style="margin:4px 0 10px">Моделро интихоб кунед → акси худ, андоза ва матоъ → ЗС нишон медиҳад, ки чӣ тавр менишинад.</p>
+  <div class="chips" style="flex-wrap:nowrap;overflow-x:auto">${[['all','Ҳама'],...Object.entries(CUTS)].map(([k,l])=>`<button style="${catF===k?'background:var(--plum);color:#fff;border-color:var(--plum)':''}" onclick="catF='${k}';render()">${l}</button>`).join('')}</div>
+  <div class="cat">${list.map(x=>`<div class="mc" onclick="openModel('${x.id}')"><img src="${x.img}" alt="${esc(x.n)}" loading="lazy">${x.own?`<button class="del" onclick="event.stopPropagation();delModel('${x.id}')">×</button>`:''}<div class="mi"><b>${esc(x.n)}</b><span>${CUTS[x.cut]} · ${LENS[x.len]}</span></div></div>`).join('')}</div>`;
+}
+function openModel(id){const x=MD(id);
+  openSheet(`<img src="${x.img}" alt="" style="width:100%;max-height:54vh;object-fit:contain;border-radius:16px;background:#EFE7DC">
+  <h1 style="font-size:24px;margin-top:10px">${esc(x.n)}</h1><p class="muted">${esc(x.d||'')}</p>
+  <div class="row" style="gap:6px;flex-wrap:wrap;margin:8px 0 12px"><span class="tag t-plum">${CUTS[x.cut]}</span><span class="tag t-saff">${LENS[x.len]}</span><span class="tag t-teal">${SLS[x.sl]}</span></div>
+  <button class="btn" onclick="closeSheet();startTry('${x.id}')">👗 Бар худ санҷидан</button>`)}
+let NEWM=null;
+async function addModel(inp){const f=inp.files&&inp.files[0];if(!f)return;
+  try{NEWM={img:(await readImg(f,640)).url,cut:'aline',len:'maxi',sl:'long'};newModelSheet()}catch(e){toast('Аксро хонда натавонистем')}}
+function newModelSheet(){const seg=(k,o)=>`<div class="seg">${Object.entries(o).map(([v,l])=>`<button class="${NEWM[k]===v?'on':''}" onclick="NEWM.n=document.getElementById('nmn').value;NEWM['${k}']='${v}';newModelSheet()">${l}</button>`).join('')}</div>`;
+  openSheet(`<h1 style="font-size:22px">Модели нав</h1><img src="${NEWM.img}" alt="" style="width:100%;max-height:34vh;object-fit:contain;border-radius:14px;margin-top:8px">
+  <label class="f">Ном</label><input type="text" id="nmn" value="${esc(NEWM.n||'')}" placeholder="масалан Сурайё">
+  <label class="f">Бурриш</label>${seg('cut',CUTS)}<label class="f">Дарозӣ</label>${seg('len',LENS)}<label class="f">Остин</label>${seg('sl',{long:'дароз',wide:'васеъ',puff:'пуф',short:'кӯтоҳ'})}
+  <button class="btn" style="margin-top:12px" onclick="saveNewModel()">Илова кардан</button>`)}
+function saveNewModel(){const n=document.getElementById('nmn').value.trim()||'Модели нав';S.models=S.models||[];S.models.unshift({id:'u'+uid(),n:n.slice(0,30),d:'Модели устохона',cut:NEWM.cut,len:NEWM.len,sl:NEWM.sl,img:NEWM.img,own:true});NEWM=null;save();closeSheet();render();toast('Модел илова шуд ✓')}
+function delModel(id){if(S.__dm!==id){S.__dm=id;toast('Барои нест кардан боз пахш кунед');return}S.models=(S.models||[]).filter(x=>x.id!==id);delete S.__dm;save();render()}
+
+/* --- «Бар худ санҷидан» (wizard) --- */
+function startTry(id){T={step:0,model:id,name:'',phone:'',me:null,fab:null,H:'',chest:'',waist:'',belly:'',hips:'',shoulder:'',arm:'',more:false,len:null,img:null,imgErr:'',advice:null,busy:false,preview:null,fw:150};view='try';render();scrollTo(0,0)}
+function tryBar(n){return `<div class="steps">${[0,1,2,3,4].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</div>`}
+function tryView(){
+  const x=MD(T.model),st=T.step;
+  let h=`<main style="padding-bottom:40px"><div class="row between"><button class="back" onclick="tBack()">←</button><span class="muted" style="font-weight:700">👗 ${esc(x.n)}</span><span style="width:40px"></span></div>${tryBar(st)}`;
+  if(st===0){
+    h+=`<div class="row" style="gap:12px;align-items:flex-start"><img src="${x.img}" alt="" style="width:38%;border-radius:16px;aspect-ratio:3/4.4;object-fit:cover"><div style="flex:1"><h1 style="font-size:24px">${esc(x.n)}</h1><p class="muted">${esc(x.d||'')}</p><p class="muted" style="margin-top:6px;font-size:12.5px">${CUTS[x.cut]} · ${LENS[x.len]} · ${SLS[x.sl]}</p></div></div>
+    <label class="f">Номи шумо</label><input type="text" value="${esc(T.name)}" oninput="T.name=this.value" placeholder="ном">
+    <label class="f">Телефон</label><input type="tel" value="${esc(T.phone)}" oninput="T.phone=this.value" placeholder="+992 …">
+    <button class="btn" style="margin-top:14px" onclick="if(!T.name.trim()){toast('Номатонро нависед');return}T.step=1;render()">Давом →</button>`;
+  }
+  if(st===1){
+    h+=`<h1>Акси худ</h1><p class="muted" style="margin:4px 0 12px">Пурра, аз сар то пой, рӯ ба рӯ. Дар либоси сабук.</p>
+    <label class="ph" style="aspect-ratio:3/4.2;max-width:300px;margin:0 auto">${T.me?`<img src="${T.me.url}" alt="">`:''}<span class="lbl">Акси шумо</span>${T.me?'':'<span style="font-size:40px">🤳</span>Акс гиред ё аз галерея'}<input type="file" accept="image/*" capture="user" onchange="tPick(this,'me')"></label>
+    <div class="tips" style="margin-top:12px">🔒 Акс танҳо дар ҳамин телефон мемонад. Ба сервери ЗС танҳо ҳангоми пахши «Сохтани акс» фиристода мешавад.</div>
+    <button class="btn" style="margin-top:14px" ${T.me?'':'disabled'} onclick="T.step=2;render()">Давом →</button>`;
+  }
+  if(st===2){
+    const f=(k,l,ph)=>`<div><label class="f" style="margin-top:8px">${l}</label><input type="number" inputmode="decimal" value="${esc(T[k])}" placeholder="${ph}" oninput="T['${k}']=this.value"></div>`;
+    h+=`<h1>Андозаҳои шумо</h1><p class="muted" style="margin:4px 0 6px">Бо сантиметр (лента) чен кунед. Ҳамаи андозаҳои дигарро барнома ҳисоб мекунад.</p>
+    <div class="g2">${f('H','📏 Қад','165')}${f('chest','Давраи сина','92')}${f('waist','Давраи миён (талия)','74')}${f('belly','Давраи шикам','84')}</div>
+    <div class="tips" style="margin-top:12px">📐 <b>Чӣ тавр чен кунем:</b><br>• <b>сина</b> — аз ҷои баландтарини сина, лента рост дар пушт<br>• <b>миён</b> — ҷои аз ҳама борики камар<br>• <b>шикам</b> — ҷои аз ҳама барҷастаи шикам (тақрибан 8–10 см поёни миён)</div>
+    <button class="btn ghost" style="margin-top:10px" onclick="T.more=!T.more;render()">${T.more?'▲':'▼'} Андозаҳои иловагӣ (ихтиёрӣ)</button>
+    ${T.more?`<div class="g2">${f('hips','Давраи сурин','100')}${f('shoulder','Бари китф','38')}${f('arm','Дарозии остин','58')}</div>`:''}
+    <button class="btn" style="margin-top:14px" onclick="tSizes()">Давом →</button>`;
+  }
+  if(st===3){
+    h+=`<h1>Акси матоъ</h1><p class="muted" style="margin:4px 0 12px">Матоъро паҳн карда, аз наздик ва дар рӯшноии рӯз акс гиред — то нақш ва ранг намоён бошад.</p>
+    <label class="ph" style="aspect-ratio:1;max-width:300px;margin:0 auto">${T.fab?`<img src="${T.fab.url}" alt="">`:''}<span class="lbl">Матои шумо</span>${T.fab?'':'<span style="font-size:40px">🧵</span>Акси матоъ'}<input type="file" accept="image/*" capture="environment" onchange="tPick(this,'fab')"></label>
+    <label class="f">Бари матоъ</label><div class="seg">${FABRICS.map(f=>`<button class="${T.fw===f.w?'on':''}" onclick="T.fw=${f.w};render()">${f.w===50?'Атлас 50':f.w+' см'}</button>`).join('')}</div>
+    <button class="btn" style="margin-top:14px" ${T.fab?'':'disabled'} onclick="tResult()">✨ Натиҷа →</button>`;
+  }
+  if(st===4)h+=tryResult(x);
+  return h+'</main>';
+}
+function tBack(){if(T.step===0){view=null;tab='catalog';render();return}T.step--;render();scrollTo(0,0)}
+async function tPick(inp,k){const f=inp.files&&inp.files[0];if(!f)return;try{T[k]=await readImg(f,1024);if(k==='fab')T.preview=null;T.img=null;T.advice=null;render()}catch(e){toast('Аксро хонда натавонистем')}}
+function tSizes(){
+  const H=+T.H,c=+T.chest,w=+T.waist,b=+T.belly;
+  if(!(H>=120&&H<=210)){toast('Қадро дуруст нависед (120–210 см)');return}
+  if(!(c>=60&&c<=160)){toast('Давраи синаро санҷед (60–160)');return}
+  if(!(w>=45&&w<=160)){toast('Давраи миёнро санҷед (45–160)');return}
+  if(!(b>=50&&b<=170)){toast('Давраи шикамро санҷед (50–170)');return}
+  T.len=null;T.step=3;render();scrollTo(0,0);
+}
+function tMeas(){return fromClient(T).m}
+async function tResult(){T.step=4;render();scrollTo(0,0);
+  T.preview=await localPreview();render();
+  if(AI&&!T.advice)tAdvice();
+}
+
+/* пешнамоиши офлайн: силуэти модел бо матои шумо */
+function localPreview(){return new Promise(res=>{
+  const x=MD(T.model),W=600,H=800,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d');
+  const fab=new Image();fab.onload=()=>{
+    const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#FBF6EF');bg.addColorStop(1,'#EADFD1');g.fillStyle=bg;g.fillRect(0,0,W,H);
+    // манекен
+    g.fillStyle='#CDBBA6';g.beginPath();g.ellipse(300,70,34,40,0,0,7);g.fill();g.fillRect(288,104,24,26);
+    const cx=300,top=128,sh=78,cw=70,ww=58,hy={mini:470,midi:600,maxi:740}[x.len]||740,hem={straight:92,aline:150,wide:215,set:100}[x.cut]||150;
+    const path=new Path2D();
+    path.moveTo(cx-26,top);path.quadraticCurveTo(cx,top+22,cx+26,top);path.lineTo(cx+sh,top+16);path.lineTo(cx+cw,top+120);path.quadraticCurveTo(cx+ww-4,top+190,cx+ww,top+215);
+    path.quadraticCurveTo(cx+hem*0.75,(top+215+hy)/2,cx+hem,hy);path.quadraticCurveTo(cx,hy+18,cx-hem,hy);path.quadraticCurveTo(cx-hem*0.75,(top+215+hy)/2,cx-ww,top+215);
+    path.quadraticCurveTo(cx-ww+4,top+190,cx-cw,top+120);path.lineTo(cx-sh,top+16);path.closePath();
+    const sleeve=s=>{const p=new Path2D(),d=s;const sl=x.sl;
+      if(sl==='puff'){p.moveTo(cx+d*sh,top+16);p.bezierCurveTo(cx+d*(sh+70),top-6,cx+d*(sh+70),top+110,cx+d*(sh+18),top+118);p.lineTo(cx+d*(cw-2),top+110);p.closePath();return p}
+      const ln=sl==='short'?150:top+330,wE=sl==='wide'?95:sl==='short'?48:36;
+      p.moveTo(cx+d*sh,top+16);p.lineTo(cx+d*(sh+30+(sl==='wide'?40:0)),sl==='short'?top+150:ln);p.lineTo(cx+d*(sh+30+(sl==='wide'?40:0)-wE),sl==='short'?top+150:ln+8);p.lineTo(cx+d*(cw-4),top+118);p.closePath();return p};
+    const pat=g.createPattern((()=>{const t=document.createElement('canvas'),k=260/Math.max(fab.width,fab.height);t.width=fab.width*k;t.height=fab.height*k;t.getContext('2d').drawImage(fab,0,0,t.width,t.height);return t})(),'repeat');
+    [sleeve(-1),sleeve(1),path].forEach(p=>{g.save();g.shadowColor='rgba(0,0,0,.18)';g.shadowBlur=18;g.fillStyle=pat;g.fill(p);g.restore();
+      const sh2=g.createLinearGradient(cx-hem,0,cx+hem,0);sh2.addColorStop(0,'rgba(0,0,0,.22)');sh2.addColorStop(.35,'rgba(255,255,255,.05)');sh2.addColorStop(.55,'rgba(255,255,255,.12)');sh2.addColorStop(1,'rgba(0,0,0,.25)');g.fillStyle=sh2;g.fill(p);g.strokeStyle='rgba(43,36,32,.35)';g.lineWidth=1.5;g.stroke(p)});
+    // пояи манекен
+    if(x.len!=='maxi'){g.fillStyle='#8C7A66';g.fillRect(296,hy+10,8,H-hy-50);g.fillRect(250,H-42,100,8)}
+    g.fillStyle='rgba(43,36,32,.7)';g.font='600 18px Inter,Arial';g.textAlign='center';g.fillText('Пешнамоиши тахминӣ · '+x.n,W/2,H-12);
+    res(cv.toDataURL('image/jpeg',.85));
+  };fab.onerror=()=>res(null);fab.src=T.fab.url;
+})}
+
+function imgBlob(src){if(src.startsWith('data:'))return Promise.resolve(dataUrlToBlob(src));
+  return new Promise((res,rej)=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);try{res(dataUrlToBlob(c.toDataURL('image/jpeg',.85)))}catch(e){rej(e)}};im.onerror=rej;im.src=src})}
+async function tAdvice(){
+  const x=MD(T.model),m=tMeas();T.advice='…';render();
+  const prompt=`${infoCtx()}Ту устои ботаҷрибаи дӯзандаи либоси занонаи тоҷикӣ ҳастӣ. Се акс: 1) мизоҷ, 2) модели либос «${x.n}» (${x.d}; ${CUTS[x.cut]}, ${LENS[x.len]}, ${SLS[x.sl]}), 3) матои мизоҷ.
+Андозаҳо (см): қад ${m.height}, сина ${m.chest}, миён ${m.waist}, шикам ${m.belly}, сурин (тахминӣ) ${m.hips}.
+Ба забони тоҷикӣ (кириллӣ), кӯтоҳ ва самимӣ баҳо деҳ: ин модел аз ин матоъ ба ин мизоҷ чӣ тавр менишинад; матоъ ба модел мувофиқ аст ё не (ғафсӣ, нақш, самти нақш); чӣ тағйир додан беҳтар аст (дарозӣ, остин, камар). Агар дар акс одам ё матоъ намоён набошад, ростқавлона бигӯ.
+Танҳо JSON: {"fit":"2–3 ҷумла","fabric":"1–2 ҷумла","tips":["...","...","..."]}`;
+  try{const imgs=[dataUrlToBlob(T.me.url),await imgBlob(x.img),dataUrlToBlob(T.fab.url)];
+    const o=AIimg?await AI.json(prompt,{images:imgs,modelTier:'default'}):await AI.json(prompt.replace('Се акс:','Аксҳо нестанд, танҳо тавсиф:'),{modelTier:'default'});
+    T.advice={fit:o.fit||'',fabric:o.fabric||'',tips:Array.isArray(o.tips)?o.tips.slice(0,5):[]};
+  }catch(e){T.advice=null;toast(e&&e.code==='rate_limited'?'ЗС банд аст — баъдтар':'Маслиҳати ЗС гирифта нашуд')}
+  render();
+}
+async function tImage(){
+  if(!(AI&&AI.image)){toast('Барои акс сервери ЗС лозим (⚙️)');return}
+  const x=MD(T.model),m=tMeas();T.busy=true;T.imgErr='';render();
+  const ar=T.me.w/T.me.h,RT=[['9:16',9/16],['2:3',2/3],['3:4',3/4],['4:5',4/5],['1:1',1],['5:4',5/4],['4:3',4/3],['3:2',3/2],['16:9',16/9]];
+  const aspect=RT.reduce((b,r)=>Math.abs(r[1]-ar)<Math.abs(b[1]-ar)?r:b)[0];
+  const prompt=`PHOTO EDITING TASK (virtual try-on). Do NOT create a new person or a new photo.
+Edit the FIRST image (the customer's own photo). Keep EVERYTHING in it exactly the same: the same person, face, facial features, hair, head covering, skin tone, hands, body shape and size, pose, camera angle, framing, background and lighting.
+Change ONLY the clothing: replace what the customer is wearing with the dress design shown in the second image, sewn from the fabric shown in the third image.
+The customer's body measurements: height ${m.height} cm, chest ${m.chest} cm, waist ${m.waist} cm, belly ${m.belly} cm — the dress must fit THIS body, not the body of the reference model.`;
+  const labels=['IMAGE 1 — the customer\'s photo. THIS is the photo to edit. Keep this person and this background.',
+    `IMAGE 2 — dress design reference "${x.n}" (${x.d}; ${x.cut==='wide'?'wide full skirt':x.cut==='straight'?'straight fitted cut':'A-line cut'}, ${x.len==='maxi'?'floor length':x.len==='midi'?'mid-calf length':'knee length'}, ${({long:'long sleeves',wide:'wide flared sleeves',puff:'puff sleeves',short:'short sleeves'})[x.sl]}). Copy ONLY the garment's cut, silhouette, sleeves and decoration. IGNORE the person, mannequin, face and background in this image.`,
+    'IMAGE 3 — the customer\'s fabric. Use its colours and pattern for the dress, at a realistic scale.'];
+  const final='Return one edited photo: the same person from IMAGE 1, same pose and background, now wearing the new dress. No text, no collage, no second person.';
+  try{const r=await AI.image(prompt,{images:[dataUrlToBlob(T.me.url),await imgBlob(x.img),dataUrlToBlob(T.fab.url)],labels,final,aspect});T.img=r.image;T.show='after'}
+  catch(e){T.imgErr=e&&e.code==='image_quota'?'Сервер акс сохта натавонист: модели акси Gemini калиди пулакӣ (billing) мехоҳад ё лимит тамом шуд.':e&&e.code==='network'?'Интернет нест.':'Акс сохта нашуд: '+((e&&e.message)||'хато')}
+  T.busy=false;render();
+}
+function tryResult(x){
+  const m=tMeas();if(!T.len)T.len=x.cut==='set'?r0(m.height*0.6):dressLen(m.height,x.len);
+  const pcs=draftModel(x,m,{len:T.len}),L=layout(pcs,T.fw,S.seam);
+  const canImg=!!(AI&&AI.image);
+  let h=`<h1>Натиҷа</h1>
+  ${T.img?`<div class="seg" style="margin-top:8px"><button class="${T.show!=='before'?'on':''}" onclick="T.show='after';render()">✨ Баъд</button><button class="${T.show==='before'?'on':''}" onclick="T.show='before';render()">📷 Пеш</button></div>`:''}
+  <div class="tryon">${T.img?`<img src="${T.show==='before'?T.me.url:T.img}" alt="Либос бар шумо">`:T.busy?`<div class="ai-load" style="padding:30px 10px"><div class="scan"><img src="${T.me.url}" alt=""></div><p class="muted">✨ ЗС либосро бар шумо «мепӯшонад»… (то 1 дақиқа)</p></div>`:T.preview?`<img src="${T.preview}" alt="Пешнамоиш">`:'<p class="muted" style="padding:40px">…</p>'}</div>
+  <div class="row" style="gap:6px;margin-top:8px"><img class="mini" src="${T.me.url}" alt=""><img class="mini" src="${x.img}" alt=""><img class="mini" src="${T.fab.url}" alt=""><span class="muted" style="font-size:12px;flex:1">шумо + модел + матоъ</span></div>
+  ${T.img?`<p class="muted" style="font-size:12px;margin-top:6px">Акси ЗС — тасаввури тахминӣ; либоси воқеӣ метавонад каме фарқ кунад.</p>`:''}
+  ${T.imgErr?`<div class="warn" style="margin-top:8px">${esc(T.imgErr)}<br><span style="font-weight:500">Ҳоло пешнамоиши тахминӣ нишон дода шуд.</span></div>`:''}
+  ${!T.img&&!T.busy?(canImg?`<button class="btn" style="margin-top:10px" onclick="tImage()">✨ Сохтани акс: либос бар ман</button>`:`<div class="note" style="margin-top:10px">Ин <b>пешнамоиши тахминӣ</b> аст: шакли модел бо матои шумо. Барои акси воқеии «либос бар шумо» дар ⚙️ сервери ЗС-ро пайваст кунед.</div>`):''}
+  ${T.img?`<button class="btn ghost" style="margin-top:8px" onclick="T.img=null;render()">↺ Пешнамоиши оддӣ</button>`:''}`;
+  if(AI){h+=`<h2>Маслиҳати ЗС</h2>${T.advice==='…'?`<div class="card"><p class="muted">✨ ЗС аксҳоро меомӯзад…</p></div>`:T.advice?`<div class="card"><p>${esc(T.advice.fit)}</p>${T.advice.fabric?`<p style="margin-top:8px">🧵 ${esc(T.advice.fabric)}</p>`:''}${T.advice.tips.length?`<ul class="tl">${T.advice.tips.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:''}</div>`:`<button class="btn light" onclick="tAdvice()">✨ Маслиҳат гирифтан</button>`}`}
+  h+=`<h2>Андозаҳои буриш</h2>
+  <div class="row" style="gap:8px"><div style="flex:1"><label class="f" style="margin-top:0">Дарозии либос, см</label><input type="number" value="${T.len}" onchange="T.len=+this.value;render()"></div><div style="flex:1"><label class="f" style="margin-top:0">Бари матоъ</label><select onchange="T.fw=+this.value;render()">${FABRICS.map(f=>`<option value="${f.w}" ${T.fw===f.w?'selected':''}>${f.n}</option>`).join('')}</select></div></div>
+  <div class="card" style="margin-top:12px;text-align:center"><p class="muted">Матоъ лозим</p><div class="big">${(L.need/100).toFixed(2)} м</div><p class="muted">бари ${T.fw} см · ${L.placed.length} порча · кромка ${S.seam} см</p>${L.split?`<p class="tag t-saff" style="margin-top:8px">Матоъ танг — баъзе порчаҳо аз 2+ қисм</p>`:''}</div>
+  <div class="card">${pcs.map(p=>{const b=bbox(p.pts);return `<div class="piece"><span><b>${p.n}</b> ×${p.cnt}<br><span class="muted" style="font-size:12px">${p.note}</span></span><span style="text-align:right;font-weight:700">${r1((b.x1-b.x0)*(p.fold?2:1))} × ${r1(b.y1-b.y0)}<br><span class="muted" style="font-size:12px">см${p.fold?' (кушода)':''}</span></span></div>`}).join('')}</div>
+  <table class="m" style="margin-top:10px">${['height','chest','waist','belly','hips','shoulder','arm'].map(k=>`<tr><td>${ML[k]}</td><td style="text-align:right"><b>${r1(m[k])}</b> <span class="muted">см${['hips','shoulder','arm'].includes(k)&&!+T[k]?' · тахм.':''}</span></td></tr>`).join('')}</table>
+  <h2>Тарҳи буриш</h2><div class="svgbox" style="max-height:460px">${layoutSVG(L,T.fw)}</div>
+  <div class="row" style="margin-top:14px"><button class="btn saff" onclick="tSave(true)">📐 Қолиби пурра</button><button class="btn teal" onclick="tSave(false)">🧾 Фармоиш</button></div>`;
+  return h;
+}
+async function tSave(toPattern){
+  const x=MD(T.model),r=fromClient(T);
+  let c=T.cid&&C(T.cid);
+  if(!c){c=S.clients.find(c=>T.phone&&c.phone===T.phone)||S.clients.find(c=>c.name===T.name.trim());
+    if(!c){c={id:uid(),name:T.name.trim(),phone:T.phone,gender:'f',created:Date.now(),meas:[]};S.clients.push(c)}
+    c.meas.push({id:uid(),date:Date.now(),m:r.m,src:'client',thumb:await thumbOf(T.me.url,160)});T.cid=c.id}
+  const L=layout(draftModel(x,r.m,{len:T.len}),T.fw,S.seam);
+  if(!toPattern||!T.saved){
+    S.orders.unshift({id:uid(),cid:c.id,g:'dress',model:x.id,len:T.len,fabric:`${x.n} · ${T.fw===50?'атлас':'бари '+T.fw} · ${(L.need/100).toFixed(2)} м`,fabImg:await thumbOf(T.fab.url,120),tryImg:T.img?await thumbOf(T.img,360):null,price:0,due:'',st:0,ts:Date.now()});
+    T.saved=true;
+  }
+  save();
+  if(toPattern){P={cid:c.id,g:'dress',model:x.id,fw:T.fw,len:T.len,sleeve:r1(r.m.arm),plan:null,planLoading:false};view='pattern';render();scrollTo(0,0);toast('Фармоиш ва андозаҳо нигоҳ дошта шуданд ✓')}
+  else{view=null;tab='orders';T=null;render();scrollTo(0,0);toast('Фармоиш қабул шуд ✓ Устод ба шумо занг мезанад')}
 }
 
 /* ===================== START ===================== */

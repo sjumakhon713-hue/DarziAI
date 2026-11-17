@@ -40,6 +40,7 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setDatabaseEnabled(true);
         s.setAllowFileAccess(true);
+        s.setAllowFileAccessFromFileURLs(true);
         s.setTextZoom(100);
 
         web.addJavascriptInterface(new Bridge(), "AndroidBridge");
