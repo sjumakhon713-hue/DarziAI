@@ -221,13 +221,28 @@ function aiSettings(){
   <p class="muted" style="margin-top:12px;font-size:12.5px">Аксҳо танҳо вақте ба сервер мераванд, ки шумо «Таҳлил бо ЗС»-ро пахш мекунед.</p>`);
 }
 async function saveAiUrl(){
-  const u=document.getElementById('aiu').value.trim();if(u&&!/^https:\/\//.test(u)){toast('Суроға бояд бо https:// сар шавад');return}
-  S.aiUrl=u;save();if(AIKIND!=='claude')useRemote();
+  let u=document.getElementById('aiu').value.trim().replace(/\s+/g,'').replace(/\/+$/,'').replace(/\/ai$/,'');
+  if(u&&!/^https?:\/\//.test(u))u='https://'+u;
+  if(u&&!/^https:\/\//.test(u)){aiDiag('Суроға бояд бо https:// сар шавад.');return}
+  document.getElementById('aiu').value=u;S.aiUrl=u;save();if(AIKIND!=='claude')useRemote();
   if(!u){closeSheet();render();return}
-  toast('Санҷиш…');
+  aiDiag('⏳ Санҷиш 1/2: сервер ҳаст?');
+  let g;
+  try{const r=await fetch(u+'/',{method:'GET'});g=await r.json().catch(()=>null)}
+  catch(e){aiDiag(`❌ Ба сервер пайваст нашуд.<br>• Суроғаро санҷед (бояд …workers.dev бошад).<br>• Интернетро санҷед.${AIKIND==='claude'?'<br>• Дар саҳифаи Claude серверҳои беруна баста мешаванд — дар APK санҷед. Дар ин ҷо ЗС-и Claude аллакай кор мекунад.':''}`);return}
+  if(!g||!g.ok){aiDiag('❌ Сервер ҷавоб дод, вале коди Дарзӣ нест (шояд «Hello World» мондааст).<br>Дар Cloudflare → Edit code → коди worker.js-ро гузоред → Deploy.');return}
+  aiDiag('⏳ Санҷиш 2/2: калиди Gemini…');
   try{const r=await remoteAI(u)('Танҳо калимаи «тайёр»-ро нависед.');closeSheet();render();toast('✅ ЗС пайваст шуд: '+(r.text||'').slice(0,30))}
-  catch(e){toast('❌ Сервер ҷавоб надод: '+(e.message||e.code||''))}
+  catch(e){const m=String(e.message||e.code||'');
+    aiDiag('❌ Сервер кор мекунад, вале Gemini ҷавоб надод.<br><b>Хато:</b> '+esc(m)+'<br>'+(
+      /GEMINI_KEY/.test(m)?'→ Дар Cloudflare: Settings → Variables and Secrets → Add → Secret, ном GEMINI_KEY, қимат калиди AIza…, баъд Deploy.':
+      /API key|API_KEY|invalid/i.test(m)?'→ Калиди Gemini нодуруст аст. Аз aistudio.google.com калиди навро нусха кунед (бе фосила) ва GEMINI_KEY-ро иваз кунед.':
+      /location|region|country/i.test(m)?'→ Gemini дар ин минтақа дастрас нест.':
+      /not found|is not supported/i.test(m)?'→ Номи модел нодуруст. Дар Cloudflare тағйирёбандаи MODEL = gemini-2.5-flash гузоред.':
+      e.code==='rate_limited'?'→ Лимит тамом шуд, 1 дақиқа баъд боз санҷед.':
+      e.code==='network'?'→ Ҷавоб наомад (шояд интернет суст аст).':'→ Ин хаторо ба ман нишон диҳед.'))}
 }
+function aiDiag(h){let el=document.getElementById('aidiag');if(!el){el=document.createElement('div');el.id='aidiag';el.className='warn';el.style.marginTop='10px';const b=document.getElementById('aiu');b.parentNode.insertBefore(el,b.nextSibling.nextSibling)}el.innerHTML=h}
 
 /* ===================== АКСҲО ===================== */
 function readImg(file,max){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>{const im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res({url:c.toDataURL('image/jpeg',.85),w:c.width,h:c.height})};im.onerror=rej;im.src=e.target.result};r.onerror=rej;r.readAsDataURL(file)})}
