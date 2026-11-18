@@ -868,7 +868,7 @@ The customer's body measurements: height ${m.height} cm, chest ${m.chest} cm, wa
     'IMAGE 3 — the customer\'s fabric. Use its colours and pattern for the dress, at a realistic scale.'];
   const final='Return one edited photo: the same person from IMAGE 1, same pose and background, now wearing the new dress. No text, no collage, no second person.';
   try{const r=await AI.image(prompt,{images:[dataUrlToBlob(T.me.url),await imgBlob(x.img),dataUrlToBlob(T.fab.url)],labels,final,aspect});T.img=r.image;T.show='after'}
-  catch(e){T.imgErr=e&&e.code==='image_quota'?'Сервер акс сохта натавонист: модели акси Gemini калиди пулакӣ (billing) мехоҳад ё лимит тамом шуд.':e&&e.code==='network'?'Интернет нест.':'Акс сохта нашуд: '+((e&&e.message)||'хато')}
+  catch(e){T.imgErr=e&&e.code==='image_quota'?'Сервер акс сохта натавонист: барои акс калиди пулакӣ лозим (OpenAI ё Gemini) ё баланс тамом шуд.':e&&e.code==='network'?'Интернет нест.':'Акс сохта нашуд: '+((e&&e.message)||'хато')}
   T.busy=false;render();
 }
 function tryResult(x){
