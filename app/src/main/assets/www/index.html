@@ -237,6 +237,7 @@ async function saveAiUrl(){
     aiDiag('❌ Сервер кор мекунад, вале Gemini ҷавоб надод.<br><b>Хато:</b> '+esc(m)+'<br>'+(
       /GEMINI_KEY/.test(m)?'→ Дар Cloudflare: Settings → Variables and Secrets → Add → Secret, ном GEMINI_KEY, қимат калиди AIza…, баъд Deploy.':
       /API key|API_KEY|invalid/i.test(m)?'→ Калиди Gemini нодуруст аст. Аз aistudio.google.com калиди навро нусха кунед (бе фосила) ва GEMINI_KEY-ро иваз кунед.':
+      /high demand|overloaded|busy|unavailable/i.test(m)?'→ Калид дуруст аст ✅. Gemini ҳоло банд аст — 1–2 дақиқа баъд боз «Нигоҳ доштан ва санҷидан»-ро пахш кунед. (worker.js-и навро гузоред — он худаш моделҳои дигарро месанҷад.)':
       /location|region|country/i.test(m)?'→ Gemini дар ин минтақа дастрас нест.':
       /not found|is not supported/i.test(m)?'→ Номи модел нодуруст. Дар Cloudflare тағйирёбандаи MODEL = gemini-2.5-flash гузоред.':
       e.code==='rate_limited'?'→ Лимит тамом шуд, 1 дақиқа баъд боз санҷед.':
